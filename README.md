@@ -1,4 +1,7 @@
 # ColdfireSimulator
-Proof of concept for 68000 Coldfire simulator in Python.
+68000 Coldfire family assembly code simulator in Python.
 
 Inside a simulation.
+
+To run the GUI: use $python3 GUI_test.py
+
