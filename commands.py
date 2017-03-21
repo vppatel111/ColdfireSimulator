@@ -2,7 +2,7 @@
 This contains all the commands related to assembly language.
 See Coldfire Manual for full details on how commands work.
 '''
-
+DEBUG = True
 # dictionary of sizes
 size_dict = {
 		'l' : 4,
@@ -10,7 +10,7 @@ size_dict = {
 		'b' : 1,
 }
 
-class Command():
+class CommandProperties():
 	'''
 	The base command file that contains the common attributes for all the commands
 	in Coldfire (ie. all commands contain a source or/and destination)
@@ -38,21 +38,30 @@ class Command():
 	def set_size(s):
 		self._size = s
 
-	def get_dest_type(d):
-		pass
+	def is_register(self, v):
+		from registers import Register
+		if isinstance(v, Register):
+			return True
+		else:
+			return False
 
-class Move(Command):
+class Move(CommandProperties):
 	def __init__(self, s, d, z):
 		super().__init__(s, d, z)
 
-class Bra(Command):
-	'''
-	'''
-	def __init__(self, label=None):
-		super().__init__(label)
+	def move(self):
+		if self.is_register(self._source):
+			self._destination.set(self._source.get(), self._size)
+			if DEBUG and print("SOURCE: {} , DEST: {}".format(hex(self._source.get()), hex(self._destination.get()))):
+				pass
+		else:
+			self._destination.set(self._source, self._size)
+			if DEBUG and print("SOURCE: {} , DEST: {}".format(hex(self._source), hex(self._destination.get()))):
+				pass
+
 # set of commands that will eventually be a part of our simulation
 command_dict = {
-		'move': lambda s,d,z: Move(s,d,z)} #'movea',
+		'move': lambda s,d,z: Move(s,d,z).move()} #'movea',
 		# 'bra', 'bne', 'beq', 'ble', 'bge', 'blt', 'bgt', 'bcc', 'bcs', 'bvc', 'bvs', 'bpl', 'bmi',
 		# 'add', 'adda', 'addi',
 		# 'sub', 'suba', 'subi',

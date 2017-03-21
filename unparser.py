@@ -45,12 +45,13 @@ class AssemblyFileReader():
         n = 0
         for line in self._line_a:
             (l, c, z, s, d) = line
-            s_val = self.get_source_dest(s)
-            d_val = self.get_source_dest(d)
+            s_val = self.parse_source_or_dest(s)
+            d_val = self.parse_source_or_dest(d)
             self._line_p[n] = command_dict[c](s_val, d_val, z)
             n += 1
-        #if DEBUG and print(self._line_p, '\n', s_val, d_val, z):
-        #    pass
+            # if DEBUG and print("source: {}, dest: {}".format(s_val, d_val.get())):
+                # pass
+
     def is_label(self, s):
         if s[-1] == ':':
             return True
@@ -63,16 +64,30 @@ class AssemblyFileReader():
         else:
             return False
 
-    def get_source_dest(self, s):
+    def parse_source_or_dest(self, s):
+        # if s.startswith('(') and s.endswith(')'):
+        #     s = s[1:-1]
+        # elif s.startswith('-(') and s.endswith(')'):
+        #     s = s[2:-1]
+        # elif s.startswith('(') and s.endswith(')+'):
+        #     s = s[1:-2]
         for t in sd_type_dict:
             if s.startswith(t):
-                v = int(s.replace(t, ''))
+                v = s.replace(t, '')
+                if v.startswith('0x'):
+                    v = int(v, 16)
+                elif v.startswith('0b'):
+                    v = int(v, 2)
+                elif v.startswith('0o'):
+                    v = int(v, 8)
+                else:
+                    v = int(v)
                 return sd_type_dict[t](v)
-        else:
-            if s in label_dict:
-                return s
-            else:
-                return int(s) # unknown type, flag error?
+            # else:
+            #     if s in self._label_dict:
+            #         return s
+            #     else:
+            #         return int(s) # unknown type, flag error?
 
     def break_command_size(self, s):
         (command, size) = s.lower().split('.')
