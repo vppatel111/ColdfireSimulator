@@ -16,18 +16,21 @@ class simulator_gui:
 
         self.master = master
         master.title("ColdFire Simulator")
+        # master.resizeable(width=False, height=False)
+        master.geometry('{}x{}'.format(1380, 889))  # width x height
 
         # Text box for code
-        self.Code_View_lbl = Text(master)
+        self.Code_View_lbl = Text(master, width=100, height=60)
         self.Code_View_lbl.insert(END, "Test")
-        self.Code_View_lbl.grid(row=0, column=0, rowspan=20, pady=20, padx=10)
+        self.Code_View_lbl.grid(row=0, column=0, rowspan=20, pady=20, padx=20)
 
         # CCR label
-        self.CCR_lbl = Label(master, text="CCR")
-        self.CCR_lbl.grid(row=0, column=1)
+        self.CCR_lbl = Label(master, text="CCR", font=("FreeSans", 15))
+        self.CCR_lbl.config(anchor="e", justify="right")
+        self.CCR_lbl.grid(row=0, column=1, sticky=E)
 
-        self.CCR_value_lbl = Label(master, text="1 0 0 1 0")
-        self.CCR_value_lbl.grid(row=0, column=2)
+        self.CCR_value_lbl = Label(master, text="1 0 0 1 0", font=("FreeSans", 15))
+        self.CCR_value_lbl.grid(row=0, column=2, padx=20, sticky=W)
 
         # OP code labels - row 0-3
         self.OP_lbl = Label(master, text="OP Code")
@@ -56,7 +59,7 @@ class simulator_gui:
 
         self.addressRegisters = []
         for _ in range(7):
-            self.addressRegisters.append(Label(master, text="0x12345678"))
+            self.addressRegisters.append(Label(master, text="0x12345678901234567890123456789012"))
 
         counter = 0
         for label in self.addressRegisters:
@@ -122,6 +125,10 @@ class simulator_gui:
         # Menu bar
         # TODO: Add additional functionality to "Load file"
         self.menubar = Menu(master)
-        self.menubar.add_command(label="Load file")
+        self.menubar.add_command(label="Load file", command=self.windowsize)
         self.menubar.add_command(label="Quit", command=master.quit)
         self.master.config(menu=self.menubar)
+
+    def windowsize(self):
+        print("height", self.master.winfo_height())
+        print("width", self.master.winfo_width())
