@@ -16,8 +16,8 @@ class AssemblyFileReader():
 
     #IDEA: potentially use a dictionary if we have multiple files?
 
-    def read_into_list(self, file_name=None):
-        if file_name is not None:
+    def read_into_list(self, file_name = None):
+        if file_name != None:
             self.file_name = file_name
         with open(self._filename) as f:
             self._file = f.readlines()
@@ -83,12 +83,11 @@ class AssemblyFileReader():
         if self.is_command(command):
             return command, size
         else:
-            pass  # raise error
+            pass # raise error
 
     def break_source_dest(self, s):
         source, dest = [e.strip().lower() for e in s.split(',')]
         return source, dest
-
 
 assembler = AssemblyFileReader('test.s')
 assembler.read_into_list()
