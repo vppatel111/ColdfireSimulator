@@ -4,6 +4,7 @@ everything.
 """
 from GUI import simulator_gui
 from memory import Memory
+from unparser import AssemblyFileReader
 import tkinter as tk
 
 root = tk.Tk()  # Create GUI object
@@ -16,12 +17,14 @@ a large list (line by line), this will be used by the GUI to display a file.
 
 """
 
+# Sample memory test code.
+# memory.print_block()
+# memory.add_block(1, 100)
+# memory.print_block(1)
+# print("mem1: ", memory.get_block(1))
+# print("mem2: ", memory.get_block(3))
+assembler = AssemblyFileReader('test.s')
+assembler.read_into_list()
 
-memory.print_block()
-memory.add_block(1, 100)
-memory.print_block(1)
-print("mem1: ", memory.get_block(1))
-print("mem2: ", memory.get_block(3))
-
-#Simulator_GUI = simulator_gui(root)  # Start up GUI
-#root.mainloop()
+Simulator_GUI = simulator_gui(root)  # Start up GUI
+root.mainloop()

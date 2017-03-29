@@ -8,6 +8,7 @@
 """
 
 from tkinter import *
+from unparser import AssemblyFileReader
 
 
 class simulator_gui:
@@ -17,7 +18,7 @@ class simulator_gui:
         self.master = master
         master.title("ColdFire Simulator")
         # master.resizeable(width=False, height=False)
-        master.geometry('{}x{}'.format(1380, 889))  # width x height
+        master.geometry('{}x{}'.format(1400, 889))  # width x height
 
         # Text box for code
         self.Code_View_lbl = Text(master, width=100, height=60)
@@ -33,33 +34,35 @@ class simulator_gui:
         self.CCR_value_lbl.grid(row=0, column=2, padx=20, sticky=W)
 
         # OP code labels - row 0-3
-        self.OP_lbl = Label(master, text="OP Code")
+        self.OP_lbl = Label(master, text="OP Code", font=("FreeSans", 15))
         self.OP_lbl.grid(row=1, column=1, columnspan=2)
 
-        self.OP_value_lbl = Label(master, text="123456789012345")
+        self.OP_value_lbl = Label(master, text="123456789012345", font=("FreeSans", 15))
         self.OP_value_lbl.grid(row=2, column=1, columnspan=2)
 
-        self.extension1_lbl = Label(master, text="Extension 1:")
+        self.extension1_lbl = Label(master, text="Extension 1:", font=("FreeSans", 15))
         self.extension1_lbl.grid(row=3, column=1)
 
-        self.extension1_value_lbl = Label(master, text="123456789012345")
+        self.extension1_value_lbl = Label(master, text="123456789012345", font=("FreeSans", 15))
         self.extension1_value_lbl.grid(row=3, column=2)
 
-        self.extension2_lbl = Label(master, text="Extension 2:")
+        self.extension2_lbl = Label(master, text="Extension 2:", font=("FreeSans", 15))
         self.extension2_lbl.grid(row=4, column=1)
 
-        self.extension2_lbl = Label(master, text="123456789012345")
+        self.extension2_lbl = Label(master, text="123456789012345", font=("FreeSans", 15))
         self.extension2_lbl.grid(row=4, column=2)
 
         # Address Register Labels - rows 5-9, cols 1-2,
         # hardcoded constants: spacer = 7th row + offset, columns = 1 or 2
         # Also note spacer is based on counter
-        self.addressReg_lbl = Label(master, text="Address Registers:")
+        self.addressReg_lbl = Label(master, text="Address Registers:",
+                                    font=("FreeSans", 15))
         self.addressReg_lbl.grid(row=5, column=1, columnspan=2)
 
         self.addressRegisters = []
         for _ in range(7):
-            self.addressRegisters.append(Label(master, text="0x12345678901234567890123456789012"))
+            self.addressRegisters.append(Label(master, text="0x12345678901234567890123456789012",
+                                               font=("FreeSans", 12), padx=10))
 
         counter = 0
         for label in self.addressRegisters:
@@ -79,12 +82,13 @@ class simulator_gui:
         # Data Register Labels - rows 10-14, col = 1,2
         # hardcoded constants: spacer = 13th row + offset, columns
         # Also note spacer is based on counter.
-        self.dataReg_lbl = Label(master, text="Data Registers:")
+        self.dataReg_lbl = Label(master, text="Data Registers:", font=("FreeSans", 12))
         self.dataReg_lbl.grid(row=10, column=1, columnspan=2)
 
         self.dataRegisters = []
         for _ in range(7):
-            self.dataRegisters.append(Label(master, text="0x12345678"))
+            self.dataRegisters.append(Label(master, text="0x12345678",
+                                            font=("FreeSans", 12)))
 
         counter = 0
         for label in self.dataRegisters:
@@ -99,7 +103,8 @@ class simulator_gui:
         self.dataRegisters[6].grid(row=14, column=1)
 
         # Memory Scroll box
-        self.memory_display_lbl = Label(master, text="Memory: ")
+        self.memory_display_lbl = Label(master, text="Memory: ",
+                                        font=("FreeSans", 12))
         self.memory_display_lbl.grid(row=15, column=1, columnspan=2)
 
         self.memory_display_list = Listbox(master)
@@ -125,10 +130,21 @@ class simulator_gui:
         # Menu bar
         # TODO: Add additional functionality to "Load file"
         self.menubar = Menu(master)
-        self.menubar.add_command(label="Load file", command=self.windowsize)
+        self.menubar.add_command(label="Load file", command=self.loadfile)
         self.menubar.add_command(label="Quit", command=master.quit)
         self.master.config(menu=self.menubar)
 
-    def windowsize(self):
+    def windowsize(self):  # DEBUG Purposes
         print("height", self.master.winfo_height())
         print("width", self.master.winfo_width())
+
+    def loadfile(self):
+        """
+        Loads in a .s file at that is currently in the same directory as
+        SimulatorMain.py and displays the text in the Text widget, additionally
+        it calls an unparser to process the file.
+        """
+        assembler = AssemblyFileReader('test.s')
+        file_data = assembler.parse_file('test.s')
+        self.Code_View_lbl.delete(1.0, END)  # Clear text
+        self.Code_View_lbl.insert(END, file_data)  # Insert the file text
