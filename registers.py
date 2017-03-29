@@ -1,12 +1,15 @@
 DEBUG = True
 
+
 class Register():
     '''
     '''
     def __init__(self):
         self._register = dict()
 
-    def add_register(self, index, value = [bytes(0), bytes(0), bytes(0), bytes(0)]):
+    def add_register(self, index, value=[bytes(0), bytes(0),
+                                         bytes(0), bytes(0)]):
+
         if index not in self._register:
             self._register[index] = value
 
@@ -21,6 +24,7 @@ class Register():
             for i in range(size):
                 self._register[index][i] = b_arr.pop()
 
+
 D = Register()
 A = Register()
 
@@ -31,7 +35,7 @@ for i in range(8):
 PC = Register()
 # source/dest type dictionary
 sd_type_dict = {
-        '%a': lambda i: A.get(i), # address register
-        '%d': lambda i: D.get(i), # data register
-        '#' : lambda i: int(i), # immediate
+        '%a': lambda i: A.get(i),  # address register
+        '%d': lambda i: D.get(i),  # data register
+        '#': lambda i: int(i),  # immediate
         }

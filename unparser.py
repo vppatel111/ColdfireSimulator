@@ -4,24 +4,26 @@ from commands import *
 from registers import *
 from memory import *
 
+# NOTE: Though I added some functions on top ,there is definitely room for combining
+# functions into each other instead of functions calling each other alot
 class AssemblyFileReader():
     '''
     '''
-    def __init__(self, file_name = None):
+    def __init__(self, file_name=None):
         self._filename = file_name  # file name
         self._file = []             # file unparsed
         self._line_a = []           # file parsed (assembly)
         self._line_p = dict()       # file parsed (python)
         self._label_dict = dict()   # to organize label to a line number
 
-    #IDEA: potentially use a dictionary if we have multiple files?
+    # IDEA: potentially use a dictionary if we have multiple files?
 
-    def read_into_list(self, file_name = None):
-        if file_name != None:
+    def read_into_list(self, file_name=None):
+        if file_name is not None:
             self.file_name = file_name
         with open(self._filename) as f:
             self._file = f.readlines()
-            #self._line_a = [line.strip().split() for line in self._line_a]
+            # self._line_a = [line.strip().split() for line in self._line_a]
             for line in self._file:
                 line = line.strip().split()
                 if self.is_label(line[0]):
@@ -35,7 +37,28 @@ class AssemblyFileReader():
             f.close()
         if DEBUG and print(self._line_a):
             pass
-        self.process_line()
+        # self.process_line() Temporarily disable processing
+
+    def unparse(self):
+        """
+        Will preform the functionality of read into list and store the output
+        in memory starting at 0, unless otherwise specified.
+        """
+        pass
+
+    def parse_file(self, file_name=None):
+        """
+        Parses the file and obtains a large raw string that will be put into
+        the text widget. Then calls unparser to process file data.
+        """
+        if file_name is not None:
+            self.file_name = file_name
+        with open(self._filename) as f:
+            self._file_contents = f.read()
+
+        f.close()
+        return self._file_contents
+
 
     def process_line(self):
         '''
@@ -51,6 +74,7 @@ class AssemblyFileReader():
             n += 1
         #if DEBUG and print(self._line_p, '\n', s_val, d_val, z):
         #    pass
+
     def is_label(self, s):
         if s[-1] == ':':
             return True
@@ -83,11 +107,12 @@ class AssemblyFileReader():
         if self.is_command(command):
             return command, size
         else:
-            pass # raise error
+            pass  # raise error
 
     def break_source_dest(self, s):
         source, dest = [e.strip().lower() for e in s.split(',')]
         return source, dest
+
 
 assembler = AssemblyFileReader('test.s')
 assembler.read_into_list()
