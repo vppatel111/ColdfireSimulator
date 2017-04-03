@@ -39,25 +39,36 @@ class CommandProperties():
 		self._size = s
 
 	def is_register(self, v):
-		from registers import Register
-		if isinstance(v, Register):
-			return True
-		else:
-			return False
+		return True
+		# from registers import *
+		# if isinstance(v, Register):
+			# return True
+		# else:
+			# return False
 
 class Move(CommandProperties):
 	def __init__(self, s, d, z):
 		super().__init__(s, d, z)
 
 	def move(self):
-		if self.is_register(self._source):
-			self._destination.set(self._source.get(), self._size)
-			if DEBUG and print("SOURCE: {} , DEST: {}".format(hex(self._source.get()), hex(self._destination.get()))):
-				pass
-		else:
-			self._destination.set(self._source, self._size)
-			if DEBUG and print("SOURCE: {} , DEST: {}".format(hex(self._source), hex(self._destination.get()))):
-				pass
+		# if self.is_register(self._source):
+		# 	self._destination.set(self._source.get(), self._size)
+		# 	if DEBUG and print("SOURCE: {} , DEST: {}".format(hex(self._source.get()), hex(self._destination.get()))):
+		# 		pass
+		# else:
+		# 	self._destination.set(self._source, self._size)
+		# 	if DEBUG and print("SOURCE: {} , DEST: {}".format(hex(self._source), hex(self._destination.get()))):
+		# 		pass
+		if self._size == 1:
+			self._destination = self._destination & 0xffffff00
+			self._source &= 0xff
+		elif self._size == 2:
+			self._destination = self._destination & 0xffff0000
+			self._source &= 0xffff
+		elif self._size == 4:
+			self._destination = self._destination & 0x00000000
+			self._source &= 0xffffffff
+		return self._destination + self._source
 
 # set of commands that will eventually be a part of our simulation
 command_dict = {

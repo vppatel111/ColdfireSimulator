@@ -1,6 +1,6 @@
 DEBUG = True
 
-class Register():
+class DataRegister():
     '''
     '''
     def __init__(self):
@@ -43,17 +43,21 @@ class Register():
         #     for i in range(size):
         #         self._val[i] = b_arr.pop()
 
+class AddressRegister(DataRegister):
+    def __init__(self):
+        super().__init__()
+
 D = dict()
 A = dict()
 
 for i in range(8):
-    D[i] = Register()
-    A[i] = Register()
+    D[i] = DataRegister()
+    A[i] = AddressRegister()
 
-PC = Register()
+PC = AddressRegister()
 # source/dest type dictionary
 sd_type_dict = {
-        '%a': lambda i: A.get(i), # address register
-        '%d': lambda i: D.get(i), # data register
-        '#' : lambda i: int(i), # immediate
+        r'%a': lambda i: A.get(i), # address register
+        r'%d': lambda i: D.get(i), # data register
+        r'#' : lambda i: int(i), # immediate
         }
