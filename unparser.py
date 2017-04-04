@@ -5,30 +5,30 @@ from registers import *
 from memory import *
 
 class line():
-'''
-The line object contains and handles all the processing of the assembly line
-code as python code. As such, it holds all the information of a given line.
+    '''
+    The line object contains and handles all the processing of the assembly line
+    code as python code. As such, it holds all the information of a given line.
 
-Attributes:
-    label (str):    Holds the label of the line, if there exists a label, else
-                    it is None by default.
+    Attributes:
+        label (str):    Holds the label of the line, if there exists a label, else
+                        it is None by default.
 
-    command (str):  The command that is being executed in the line. It is a
-                    string so that we can invoke the command using command_dict.
+        command (str):  The command that is being executed in the line. It is a
+                        string so that we can invoke the command using command_dict.
 
-    size (int):     Holds the size of the command being executed (in bytes).
-                    ie. If command is being executed as a longword, the size
-                    that will be stored is 4. Similarly word has a size of 2.
+        size (int):     Holds the size of the command being executed (in bytes).
+                        ie. If command is being executed as a longword, the size
+                        that will be stored is 4. Similarly word has a size of 2.
 
-    source (obj):   The source is either an instance of the effective address
-                    class, register class, or an immediate (integer) value.
+        source (obj):   The source is either an instance of the effective address
+                        class, register class, or an immediate (integer) value.
 
-    destination (obj):  Similar to source, that is, it is an instance of the
-                    effective address class, or register class, but cannot be
-                    an immediate value.
+        destination (obj):  Similar to source, that is, it is an instance of the
+                        effective address class, or register class, but cannot be
+                        an immediate value.
 
-    #TODO: need more testing!!!
-'''
+        #TODO: need more testing!!!
+    '''
     def __init__(self, l = None, c = None, z = None, s = None, d = None):
         self.label = l
         self.size = z
@@ -129,20 +129,32 @@ class AssemblyFileReader():
         #NOTE:  Under this phase of the program, everything stored into the tuple
                 is still a string type
         '''
+        c = re.compile(r"""
+        \s*                    # skip white space
+        ((?P<label>.*)\:)?
+        \s*
+        ((?P<command>[a-z]+)?(\.(?P<size>[b|w|l]))?
+        \s*
+        (?P<source>.+?)?         # source group
+        \s* (, \s*              # skip white space before/after comma
+        (?P<dest>.*)?)?)?       # dest group
+        \s*$                   # skip white space until end of line
+        """, re.VERBOSE)
         if file_name != None:
             self.file_name = file_name
         with open(self._filename) as f:
             self._file = f.readlines()
-            #self._line_a = [line.strip().split() for line in self._line_a]
             for line in self._file:
-                line = line.strip().split()
-                if self.is_label(line[0]):
-                    label = line.pop(0)
-                    self._label_dict[label] = self._file.index(line)
-                else:
-                    label = None
-                (command, size) = self.break_command_size(line[0])
-                (source, dest) = self.break_source_dest(line[1:])
+                line = line.strip().lower()
+                if line == '':
+                    continue
+                l = c.search(line)
+                label = l.group('label')
+                command = l.group('command')
+                size = l.group('size')
+                source = l.group('source')
+                dest = l.group('dest')
+                print([label, command, size, source, dest])
                 self._line_a.append((label, command, size, source, dest))
             f.close()
         if DEBUG and print(self._line_a): pass
@@ -157,6 +169,10 @@ class AssemblyFileReader():
         n = 0
         for e in self._line_a:
             (l, c, z, s, d) = e
+            if l != None and l not in self._label_dict:
+                self._label_dict[l] = n
+            if z in size_dict:
+                z = size_dict[z]
             s = self.parse_source_or_dest(s, z)
             d = self.parse_source_or_dest(d, z)
             self._line_p[n] = line(l, c, z, s, d)
@@ -178,6 +194,10 @@ class AssemblyFileReader():
                         ie. '%a0' will return the instance of the AddressRegister
                         class that represents the register a0.
         '''
+
+        if s is None:
+            return None
+
         if s.startswith('-'):
             v = s[1:]
             c = re.compile(r"""
@@ -250,49 +270,6 @@ class AssemblyFileReader():
                     else:
                         v = int(v)
                     return sd_type_dict[t](v)
-
-        return None
-
-
-
-    def break_command_size(self, s):
-        '''
-        Seperates the command and the size string. Additionally this will
-        return the size in bytes.
-
-        #TODO: Raise error flag
-
-        Example:
-            break_command_size('move.l') -> command = 'move', size = 4
-        '''
-        (command, size) = s.lower().split('.')
-        if size in size_dict:
-            size = size_dict[size]
-        else:
-            size = None
-        if self.is_command(command):
-            return command, size
-        else:
-            pass # raise error
-
-    def break_source_dest(self, l):
-        '''
-        Seperates the source and destination.
-        '''
-        sd = ""
-        for p in l:
-            sd += p.strip()
-        # seperating the source and destination
-        c = re.compile(r"""
-        \s*                     # skip white space
-        (?P<source>[^.]+)       # source group
-        \s* , \s*               # skip white space before/after comma
-        (?P<dest>.*?)           # dest group
-        \s*$                    # skip white space until end of line
-        """, re.VERBOSE)
-        source, dest = [e for e in c.split(sd) if e != '']
-        #if DEBUG and print(source, dest): pass
-        return source, dest
 
 assembler = AssemblyFileReader('test.s')
 assembler.read_into_list()
