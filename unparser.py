@@ -45,7 +45,7 @@ class AssemblyFileReader():
             pass
         # self.process_line() Temporarily disable processing
 
-    def unparse(self):
+    def unparse(self):  # Added oarses line by line and appends line numbers
         """
         Will preform the functionality of read into list and store the output
         in memory starting at 0, unless otherwise specified.
@@ -60,10 +60,16 @@ class AssemblyFileReader():
         if file_name is not None:
             self.file_name = file_name
         with open(self._filename) as f:
-            self._file_contents = f.read()
+            self._file_contents = f.readlines()
+            parsed_file = ""
+            line_num = 0
+            for line in self._file_contents:
+                line_num += 1
+                line = str(line_num) + ": " + line
+                parsed_file += line
 
         f.close()
-        return self._file_contents
+        return parsed_file
 
     def process_line(self):
         '''

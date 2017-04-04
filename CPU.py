@@ -7,7 +7,7 @@ from commands import *
 class CPU():
     """
     Central processing unit class, depending on it's internal program counter
-    it runs code sotred in memory sepecified.
+    it runs code sorted in memory specified.
     """
     def __init__(self):
         memory = Memory()  # Initialize memory
