@@ -4,16 +4,15 @@ See Coldfire Manual for full details on how commands work.
 '''
 
 # dictionary of sizes
-size_dict = {
-		'l' : 4,
-		'w' : 2,
-		'b' : 1,
-}
+size_dict = {'l': 4,
+			 'w': 2,
+	         'b': 1,}
+
 
 class Command():
 	'''
-	The base command file that contains the common attributes for all the commands
-	in Coldfire (ie. all commands contain a source or/and destination)
+	The base command file that contains the common attributes for all the
+	commands in Coldfire (ie. all commands contain a source or/and destination).
 	'''
 	def __init__(self, source = None, dest = None, size = None):
 		self._source = source
@@ -51,6 +50,7 @@ class Bra(Command):
 	def __init__(self, label=None):
 		super().__init__(label)
 # set of commands that will eventually be a part of our simulation
+
 command_dict = {
 		'move': lambda s,d,z: Move(s,d,z)} #'movea',
 		# 'bra', 'bne', 'beq', 'ble', 'bge', 'blt', 'bgt', 'bcc', 'bcs', 'bvc', 'bvs', 'bpl', 'bmi',

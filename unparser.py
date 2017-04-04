@@ -8,6 +8,12 @@ from memory import *
 # functions into each other instead of functions calling each other alot
 class AssemblyFileReader():
     '''
+    Assembler class, contains a series of functions for parsing through files.
+        unparse(self) - Reads in and processes entire file, returning formatted
+            data that can be stored in memory.
+        parse_file(self. file_name) - Reads in and returns an entire file as
+            a raw string that can be displayed in a Text widget.
+
     '''
     def __init__(self, file_name=None):
         self._filename = file_name  # file name
@@ -26,7 +32,7 @@ class AssemblyFileReader():
             # self._line_a = [line.strip().split() for line in self._line_a]
             for line in self._file:
                 line = line.strip().split()
-                if self.is_label(line[0]):
+                if self.is_label(line[0]): # BUG: Cannot handly empty lines
                     label = line.pop(0)
                     self._label_dict[label] = self._file.index(line)
                 else:
@@ -39,7 +45,7 @@ class AssemblyFileReader():
             pass
         # self.process_line() Temporarily disable processing
 
-    def unparse(self):
+    def unparse(self):  # Added oarses line by line and appends line numbers
         """
         Will preform the functionality of read into list and store the output
         in memory starting at 0, unless otherwise specified.
@@ -54,11 +60,16 @@ class AssemblyFileReader():
         if file_name is not None:
             self.file_name = file_name
         with open(self._filename) as f:
-            self._file_contents = f.read()
+            self._file_contents = f.readlines()
+            parsed_file = ""
+            line_num = 0
+            for line in self._file_contents:
+                line_num += 1
+                line = str(line_num) + ": " + line
+                parsed_file += line
 
         f.close()
-        return self._file_contents
-
+        return parsed_file
 
     def process_line(self):
         '''
