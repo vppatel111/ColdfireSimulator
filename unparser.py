@@ -8,6 +8,12 @@ from memory import *
 # functions into each other instead of functions calling each other alot
 class AssemblyFileReader():
     '''
+    Assembler class, contains a series of functions for parsing through files.
+        unparse(self) - Reads in and processes entire file, returning formatted
+            data that can be stored in memory.
+        parse_file(self. file_name) - Reads in and returns an entire file as
+            a raw string that can be displayed in a Text widget.
+
     '''
     def __init__(self, file_name=None):
         self._filename = file_name  # file name
@@ -26,7 +32,7 @@ class AssemblyFileReader():
             # self._line_a = [line.strip().split() for line in self._line_a]
             for line in self._file:
                 line = line.strip().split()
-                if self.is_label(line[0]):
+                if self.is_label(line[0]): # BUG: Cannot handly empty lines
                     label = line.pop(0)
                     self._label_dict[label] = self._file.index(line)
                 else:
@@ -58,7 +64,6 @@ class AssemblyFileReader():
 
         f.close()
         return self._file_contents
-
 
     def process_line(self):
         '''

@@ -3,5 +3,4 @@
 
 Inside a simulation.
 
-To run the GUI: use $python3 GUI_test.py
-
+To run the GUI: use $python3 SimulatorMain.py

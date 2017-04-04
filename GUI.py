@@ -138,7 +138,7 @@ class simulator_gui:
         print("height", self.master.winfo_height())
         print("width", self.master.winfo_width())
 
-    def loadfile(self):
+    def loadfile(self, memory=None):
         """
         Loads in a .s file at that is currently in the same directory as
         SimulatorMain.py and displays the text in the Text widget, additionally
