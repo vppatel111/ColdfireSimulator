@@ -24,6 +24,7 @@ class EffectiveAddress():
 
 class Memory():
     '''
+<<<<<<< HEAD
     This class handles all the memory components of the Coldfire simulator.
 
     Attributes:
@@ -31,6 +32,14 @@ class Memory():
                         an effective address. The key to the dictionary is the memory
                         location while the value is an instance of the effective address
                         class.
+=======
+    Dynamic memory class, this is essentially a large dictionary that can
+    be accessed using (mem).add_block(loc, val) and (mem).get_block(loc).
+    Where the amount of memory used depends on how much is initialized or
+    used during runtime of assembly program.
+
+    Note: Resets after every execution of SimulatorMain.
+>>>>>>> c52303f5ff37c8d426f14e7a19509d1464fc84ad
     '''
     def __init__(self):
         self._mem = dict()
