@@ -43,8 +43,9 @@ class DataRegister():
         #     for i in range(size):
         #         self._val[i] = b_arr.pop()
 
+
 class AddressRegister(DataRegister):
- '''
+    '''
     Uses inheritance to create address registers that account for address
     wrapping.
     '''
@@ -82,6 +83,10 @@ class AddressRegister(DataRegister):
         #
         # else:
         #     pass  # TODO: Error
+
+
+D = dict()
+A = dict()
 
 for i in range(8):
     D[i] = DataRegister()
