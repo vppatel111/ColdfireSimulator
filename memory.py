@@ -1,3 +1,13 @@
+class EffectiveAddress():
+    def __init__(self, a, v = 0):
+        self.val = v
+        self.address = a
+    def get(self):
+        return self.val
+
+    def set(self, v):
+        memory.set(self.address, v)
+
 class Memory():
     '''
     Dynamic memory class, this is essentially a large dictionary that can
@@ -10,35 +20,18 @@ class Memory():
     def __init__(self):
         self._mem = dict()
 
-    # TODO: Break up data and store each byte of data separately.
-    def add_block(self, loc=None, val=0):
-        '''
-        Adds given data into memory beginning at loc and stored in 1 byte
-        chunks.
-        '''
-        if loc not in self._mem:
-            self._mem[loc] = val
+    def get(self, address):
+        if address not in self._mem:
+            self._mem[address] = EffectiveAddress(address)
+        return self._mem.get(address)
 
-    def get_block(self, loc=None):  # Added
-        '''
-        Returns the value stored at the requested block.
-        '''
-        if loc not in self._mem:
-            print("Error")  # Requesting memory that hasn't been assigned
-            return 0
-        else:
-            return self._mem[loc]
+    def set(self, address, val):
+        b = 0xFF
+        v = val
+        offset = 0
+        while v > 0:
+            self._mem[address+offset] = EffectiveAddress(v & b)
+            v >>= 8
+            offset += 1
 
-    def _break_val(self, val):  # Not sure what this does.
-        pass
-
-    # DEBUG Feature: Prints current memory location.
-    def print_block(self, loc=None):
-        '''
-        Prints the value at the requested memory location. Assumes that the
-        memory has been assigned.
-        '''
-        if loc is not None:
-            print(self._mem[loc])
-        else:
-            print("0")
+memory = Memory()

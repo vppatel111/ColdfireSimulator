@@ -1,56 +1,55 @@
 DEBUG = True
 
-# NOTE: Does not correctly convert data into bytes and stores them.
-
-
-def convert_to_bytes(val):
+class DataRegister():
     '''
-    Converts any integer to a 32 binary representation and returns it in the
-    format: [(MSB)Byte1, Byte2, Byte3, (LSB)Byte4]
-    '''
-    pass
-
-
-class Register():
-    '''
-    Basic register class, can be used for both address and data registers
-    as they are extremely similar. Each register stores up to 32 bits of data.
-
-    Idea: To account for address wrapping, we should use inheritance for
-    separate data and address registers. OR, add additional functions that
-    account for data or address registers.
     '''
     def __init__(self):
-        self._register = dict()
+        self._val = 0
 
-    def add_register(self, index, value=[bytes(0), bytes(0),
-                                         bytes(0), bytes(0)]):
+    # def add_register(self, index, value = 0):
+    #     if index not in self._register:
+    #         self._register[index] = self.split_val(value)
 
-        if index not in self._register:
-            self._register[index] = value
+    def split_val(self, val):
+        return [(val >> i & 0xff) for i in (0, 8, 16, 24)]
 
-    def get(self, index):
-        return self._register.get(index)
+    def cat_val(self, v_arr):
+        tmp = v_arr
+        val = 0
+        for i in (0, 8, 16, 24):
+            if tmp != []:
+                val += tmp.pop() << i
+        return val
 
-    def set(self, index, val, size):
-        self._register[index][1] = val
+    def get(self):
+        # return self.cat_val(self._val)
+        return self._val
+
+    def set(self, val, size):
+        if size == 1:
+            v = self._val & 0xffffff00
+            val &= 0xff
+        elif size == 2:
+            v = self._val & 0xffff0000
+            val &= 0xffff
+        elif size == 4:
+            v = self._val & 0x00000000
+            val &= 0xffffffff
+        self._val = v + val
         # if index not in self._register:
-        #     pass  # TODO: give error
-        #     print("error")
+            # pass # TODO: give error
         # if size <= 4 and size >= 1:
-        #     # b_arr = bytearray(val)
-        #     b_arr = val
+        #     b_arr = self.split_val(val)
         #     for i in range(size):
-        #         self._register[index][i] = b_arr.pop()
+        #         self._val[i] = b_arr.pop()
 
-
-class Address_Register(Register):
-    '''
+class AddressRegister(DataRegister):
+ '''
     Uses inheritance to create address registers that account for address
     wrapping.
     '''
     def __init__(self):
-        Register.__init__(self)
+        super().__init__()
 
     def set(self, index, val, size):
         self._register[index][1] = val
@@ -84,20 +83,14 @@ class Address_Register(Register):
         # else:
         #     pass  # TODO: Error
 
+for i in range(8):
+    D[i] = DataRegister()
+    A[i] = AddressRegister()
 
-if __name__ == '__main__':  # I'm just going to assume this is DEBUG code.
-
-    D = Register()
-    A = Register()
-
-    for i in range(8):
-        D.add_register(i)
-        A.add_register(i)
-
-    PC = Register()
-    # source/dest type dictionary
-    sd_type_dict = {
-            '%a': lambda i: A.get(i),  # address register
-            '%d': lambda i: D.get(i),  # data register
-            '#': lambda i: int(i),  # immediate
-            }
+PC = AddressRegister()
+# source/dest type dictionary
+sd_type_dict = {
+        r'%a': lambda i: A.get(i), # address register
+        r'%d': lambda i: D.get(i), # data register
+        r'#' : lambda i: int(i), # immediate
+        }
