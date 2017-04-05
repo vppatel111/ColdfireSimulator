@@ -10,6 +10,12 @@ class EffectiveAddress():
 
 class Memory():
     '''
+    Dynamic memory class, this is essentially a large dictionary that can
+    be accessed using (mem).add_block(loc, val) and (mem).get_block(loc).
+    Where the amount of memory used depends on how much is initialized or
+    used during runtime of assembly program.
+
+    Note: Resets after every execution of SimulatorMain.
     '''
     def __init__(self):
         self._mem = dict()
