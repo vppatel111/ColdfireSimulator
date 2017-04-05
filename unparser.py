@@ -159,7 +159,7 @@ class AssemblyFileReader():
                 self._line_a.append((label, command, size, source, dest))
             f.close()
         if DEBUG and print(self._line_a): pass
-        self.process_line()
+        # self.process_line() Temporary turn off
 
     def unparse(self):  # Added oarses line by line and appends line numbers
         """
