@@ -3,8 +3,8 @@ import re
 from commands import *
 from registers import *
 from memory import *
-
-class line():
+from resources import Resources
+class line(Resources):
     '''
     The line object contains and handles all the processing of the assembly line
     code as python code. As such, it holds all the information of a given line.
@@ -37,51 +37,6 @@ class line():
         self.command = c
         self.review()
 
-    def get_source(self, o = None):
-        '''
-        Returns:    The value stored within the source.
-        '''
-        if o != None:
-            self.source = o
-        if isinstance(self.source, EffectiveAddress):
-            return self.source.get()
-        elif isinstance(self.source, DataRegister):
-            return self.source.get()
-        elif isinstance(self.source, AddressRegister):
-            return self.source.get()
-        else:
-            return self.source
-
-    def get_dest(self, o = None):
-        '''
-        Returns:    The value stored within the destination.
-        '''
-        if o != None:
-            self.dest = o
-        if isinstance(self.dest, EffectiveAddress):
-            return self.dest.get()
-        elif isinstance(self.dest, DataRegister):
-            return self.dest.get()
-        elif isinstance(self.source, AddressRegister):
-            return self.dest.get()
-        else:
-            return self.source
-
-    def set_dest(self, val, size):
-        '''
-        Returns:        None
-        Side effects:   Changes the value of the number stored in the destination.
-
-        NOTE:   This method is mainly used set the new destination after applying
-                the command.
-        '''
-        if isinstance(self.dest, EffectiveAddress):
-            self.dest.set(val)
-        elif isinstance(self.dest, DataRegister):
-            self.dest.set(val, size)
-        elif isinstance(self.dest, AddressRegister):
-            self.dest.set(val, size)
-
     def review(self):
         '''
         This method executes the line as python code.
@@ -90,15 +45,12 @@ class line():
         #TODO:      Change command_dict to actual command object that invokes
                     both the command_dict as well as its method command.
         '''
-        # review source first
-        s = self.get_source()
-        # review destination next
-        d = self.get_dest()
         # execute command:
-        d = command_dict.get(self.command)(s, d, self.size)
-        self.set_dest(d, self.size)
+        Command(self.command, self.size, self.source, self.dest)
+        s = self.get_source()
         d = self.get_dest()
-        if DEBUG and print("SOURCE: {} , DEST: {}".format(hex(s), hex(d))): pass
+        # print(self.source, self.dest)
+        if DEBUG and print("SOURCE: {} , DEST: {}".format(s, d)): pass
 
 class AssemblyFileReader():
     '''
@@ -130,15 +82,15 @@ class AssemblyFileReader():
                 is still a string type
         '''
         c = re.compile(r"""
-        \s*                    # skip white space
+        \s*                     # skip white space
         ((?P<label>.*)\:)?
         \s*
         ((?P<command>[a-z]+)?(\.(?P<size>[b|w|l]))?
         \s*
-        (?P<source>.+?)?         # source group
+        (?P<source>.+?)?        # source group
         \s* (, \s*              # skip white space before/after comma
         (?P<dest>.*)?)?)?       # dest group
-        \s*$                   # skip white space until end of line
+        \s*$                    # skip white space until end of line
         """, re.VERBOSE)
         if file_name != None:
             self.file_name = file_name
@@ -154,10 +106,9 @@ class AssemblyFileReader():
                 size = l.group('size')
                 source = l.group('source')
                 dest = l.group('dest')
-                print([label, command, size, source, dest])
+                # if DEBUG and print([label, command, size, source, dest]): pass
                 self._line_a.append((label, command, size, source, dest))
             f.close()
-        if DEBUG and print(self._line_a): pass
         self.process_line()
 
     def process_line(self):
@@ -166,7 +117,7 @@ class AssemblyFileReader():
         strings into their equivalent python objects using the parse functions.
         Line[n] is stored into self._line_p.
         '''
-        n = 0
+        n = 0 # line number (0 indexed)
         for e in self._line_a:
             (l, c, z, s, d) = e
             if l != None and l not in self._label_dict:
@@ -175,9 +126,9 @@ class AssemblyFileReader():
                 z = size_dict[z]
             s = self.parse_source_or_dest(s, z)
             d = self.parse_source_or_dest(d, z)
+            if DEBUG and print(e): pass
             self._line_p[n] = line(l, c, z, s, d)
             n += 1
-            # if DEBUG and print("source: {}, dest: {}".format(s_val, d_val.get())): pass
 
     def parse_source_or_dest(self, s, z):
         '''

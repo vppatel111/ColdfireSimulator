@@ -2,6 +2,7 @@
 This contains all the commands related to assembly language.
 See Coldfire Manual for full details on how commands work.
 '''
+from resources import Resources
 DEBUG = True
 # dictionary of sizes
 size_dict = {
@@ -10,75 +11,162 @@ size_dict = {
 		'b' : 1,
 }
 
-class CommandProperties():
+class Command(Resources):
 	'''
 	The base command file that contains the common attributes for all the commands
 	in Coldfire (ie. all commands contain a source or/and destination)
 	'''
-	def __init__(self, source = None, dest = None, size = None):
-		self._source = source
-		self._destination = dest
-		self._size = size
+	def __init__(self, c, z, s, d):
+		# set of commands that will eventually be a part of our simulation
+		self.size = z
+		self.source = s
+		self.dest = d
 
-	def get_source():
-		return self._source
+		command_dict = {
+			'move': 	lambda: self.move(),
+			'movea':	lambda: self.movea(),
 
-	def get_destination():
-		return self._destination
+			'bra':		lambda: self.bra(),
+			'bne':		lambda: self.bne(),
+			'beq':		lambda: self.beq(),
+			'ble':		lambda: self.ble(),
+			'bge':		lambda: self.bge(),
+			'blt':		lambda: self.blt(),
+			'bgt':		lambda: self.bgt(),
+			'bcc':		lambda: self.bcc(),
+			'bcs':		lambda: self.bcs(),
+			'bvc':		lambda: self.bvc(),
+			'bvs':		lambda: self.bvs(),
+			'bpl':		lambda: self.bpl(),
+			'bmi':		lambda: self.bmi(),
 
-	def get_size():
-		return self._size
+			'add':		lambda: self.add(),
+			'adda':		lambda: self.adda(),
+			'addi':		lambda: self.addi(),
 
-	def set_source(s):
-		self._source = s
+			'sub':		lambda: self.sub(),
+			'suba':		lambda: self.suba(),
+			'subi':		lambda: self.subi(),
 
-	def set_destination(d):
-		self._destination = d
+			'clr':		lambda: self.clr(),
+			'neg':		lambda: self.neg(),
 
-	def set_size(s):
-		self._size = s
+			'asl':		lambda: self.asl(),
+			'asr':		lambda: self.asr(),
 
-	def is_register(self, v):
-		return True
-		# from registers import *
-		# if isinstance(v, Register):
-			# return True
-		# else:
-			# return False
+			'and':		lambda: self._and(),
+			'or':		lambda: self._or(),
+			'eor':		lambda: self._eor(),
+			'not':		lambda: self._not(),
 
-class Move(CommandProperties):
-	def __init__(self, s, d, z):
-		super().__init__(s, d, z)
+			'cmp':		lambda: self.cmp(),
+			'cmpa':		lambda: self.cmpa(),
+			'cmpi':		lambda: self.cmpi(),
+			}
+		if c in command_dict:
+			command_dict[c]()
 
 	def move(self):
-		# if self.is_register(self._source):
-		# 	self._destination.set(self._source.get(), self._size)
-		# 	if DEBUG and print("SOURCE: {} , DEST: {}".format(hex(self._source.get()), hex(self._destination.get()))):
-		# 		pass
-		# else:
-		# 	self._destination.set(self._source, self._size)
-		# 	if DEBUG and print("SOURCE: {} , DEST: {}".format(hex(self._source), hex(self._destination.get()))):
-		# 		pass
-		if self._size == 1:
-			self._destination = self._destination & 0xffffff00
-			self._source &= 0xff
-		elif self._size == 2:
-			self._destination = self._destination & 0xffff0000
-			self._source &= 0xffff
-		elif self._size == 4:
-			self._destination = self._destination & 0x00000000
-			self._source &= 0xffffffff
-		return self._destination + self._source
+		s = self.get_source()
+		d = self.get_dest()
+		z = self.size
+		if z == 1:
+			d &= 0xffffff00
+			s &= 0xff
+		elif z == 2:
+			d &= 0xffff0000
+			s &= 0xffff
+		elif z == 4:
+			d &= 0x00000000
+			s &= 0xffffffff
+		self.set_dest(s+d, z)
 
-# set of commands that will eventually be a part of our simulation
-command_dict = {
-		'move': lambda s,d,z: Move(s,d,z).move()} #'movea',
-		# 'bra', 'bne', 'beq', 'ble', 'bge', 'blt', 'bgt', 'bcc', 'bcs', 'bvc', 'bvs', 'bpl', 'bmi',
-		# 'add', 'adda', 'addi',
-		# 'sub', 'suba', 'subi',
-		# 'clr',
-		# 'neg',
-		# 'asl', 'asr',
-		# 'and', 'or', 'eor', 'not',
-		# 'cmp', 'cmpa', 'cmpi',
-		# }
+	def movea(self):
+		pass
+
+	def bra(self):
+		pass
+
+	def bne(self):
+		pass
+
+	def beq(self):
+		pass
+
+	def ble(self):
+		pass
+
+	def bge(self):
+		pass
+
+	def blt(self):
+		pass
+
+	def bgt(self):
+		pass
+
+	def bcc(self):
+		pass
+
+	def bcs(self):
+		pass
+
+	def bvs(self):
+		pass
+
+	def bpl(self):
+		pass
+
+	def bmi(self):
+		pass
+
+	def add(self):
+		pass
+
+	def adda(self):
+		pass
+
+	def addi(self):
+		pass
+
+	def sub(self):
+		pass
+
+	def suba(self):
+		pass
+
+	def subi(self):
+		pass
+
+	def clr(self):
+		pass
+
+	def neg(self):
+		pass
+
+	def asl(self):
+		pass
+
+	def asr(self):
+		pass
+
+	def _and(self):
+		pass
+
+	def _or(self):
+		pass
+
+	def _eor(self):
+		pass
+
+	def _not(self):
+		pass
+
+	def cmp(self):
+		pass
+
+	def cmpa(self):
+		pass
+
+	def cmpi(self):
+		pass
