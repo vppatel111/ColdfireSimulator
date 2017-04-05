@@ -1,5 +1,15 @@
-move.l  #0xFFFEDCBF,%d0
-move.l  #0x12348765,%d1
-move.l  #0x8070A0B0,%a0
-move.b	%d1,%d0
-move.w	%d0,%d1
+Start: 	clr.l %d0
+	clr.l %d1
+	movea.l #0x1000, %a0
+	move.l #5, %d2
+Loop:	move.w (%a0),%d3
+	bpl Positive
+
+Negative: add.l #1, %d1
+	bra Check
+
+Positive:
+	add.l #1, %d0
+Check:	adda.l #2, %a0
+	sub.l #1, %d2
+	bne Loop
