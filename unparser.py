@@ -52,21 +52,21 @@ class AssemblyFileReader():
         """
         pass
 
-    def parse_file(self, file_name=None):
+    def parse_file(self, file_name=None):  # Make it colourful
         """
-        Parses the file and obtains a large raw string that will be put into
-        the text widget. Then calls unparser to process file data.
+        Parses the file and obtains a formatted string that will be put into
+        the text widget.
         """
         if file_name is not None:
             self.file_name = file_name
-        with open(self._filename) as f:
-            self._file_contents = f.readlines()
-            parsed_file = ""
-            line_num = 0
-            for line in self._file_contents:
-                line_num += 1
-                line = str(line_num) + ": " + line
-                parsed_file += line
+            with open(self._filename) as f:
+                self._file_contents = f.readlines()
+                parsed_file = ""
+                line_num = 0
+                for line in self._file_contents:
+                    line_num += 1
+                    line = str(line_num) + ": " + line
+                    parsed_file += line
 
         f.close()
         return parsed_file

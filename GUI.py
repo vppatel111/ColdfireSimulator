@@ -30,14 +30,16 @@ class simulator_gui:
         self.CCR_lbl.config(anchor="e", justify="right")
         self.CCR_lbl.grid(row=0, column=1, sticky=E)
 
-        self.CCR_value_lbl = Label(master, text="1 0 0 1 0", font=("FreeSans", 15))
+        self.CCR_value_lbl = Label(master, text="1 0 0 1 0", font=("FreeSans", 15),
+                                   relief=SUNKEN)
         self.CCR_value_lbl.grid(row=0, column=2, padx=20, sticky=W)
 
         # OP code labels - row 0-3
         self.OP_lbl = Label(master, text="OP Code", font=("FreeSans", 15))
         self.OP_lbl.grid(row=1, column=1, columnspan=2)
 
-        self.OP_value_lbl = Label(master, text="123456789012345", font=("FreeSans", 15))
+        self.OP_value_lbl = Label(master, text="123456789012345", font=("FreeSans", 15),
+                                  relief=SUNKEN)
         self.OP_value_lbl.grid(row=2, column=1, columnspan=2)
 
         self.extension1_lbl = Label(master, text="Extension 1:", font=("FreeSans", 15))
@@ -62,7 +64,7 @@ class simulator_gui:
         self.addressRegisters = []
         for _ in range(7):
             self.addressRegisters.append(Label(master, text="0x12345678901234567890123456789012",
-                                               font=("FreeSans", 12), padx=10))
+                                               font=("FreeSans", 12), padx=10, relief=SUNKEN))
 
         counter = 0
         for label in self.addressRegisters:
@@ -108,9 +110,14 @@ class simulator_gui:
         self.memory_display_lbl.grid(row=15, column=1, columnspan=2)
 
         self.memory_display_list = Listbox(master)
-        self.memory_display_list.grid(row=16, column=1, columnspan=2)
+        self.memory_display_list.grid(row=16, column=1)
         for item in ["one", "two", "three", "four"]:
             self.memory_display_list.insert(END, item)
+
+        self.memory_display2_list = Listbox(master)
+        self.memory_display2_list.grid(row=16, column=2)
+        for item in ["one", "two", "three", "four"]:
+            self.memory_display2_list.insert(END, item)
 
         # TODO: Implement change memory view button
         self.add_memory_btn = Button(master, text="Add")
@@ -121,11 +128,12 @@ class simulator_gui:
 
         # Next/Prev Line Buttons
         # TODO: Add functionality to buttons as well.
-        self.next_btn = Button(master, text="Next Line")
+        self.current_line_number = 1
+        self.next_btn = Button(master, text="Next Line", command=self.next_line)
         self.next_btn.grid(row=18, column=1)
 
-        self.prev_btn = Button(master, text="Prev Line")
-        self.prev_btn.grid(row=18, column=2)
+        self.reset_btn = Button(master, text="Reset", command=self.reset_line)
+        self.reset_btn.grid(row=18, column=2)
 
         # Menu bar
         # TODO: Add additional functionality to "Load file"
@@ -134,11 +142,38 @@ class simulator_gui:
         self.menubar.add_command(label="Quit", command=master.quit)
         self.master.config(menu=self.menubar)
 
+        self.dataRegister_menu = Menu(self.menubar, tearoff=0)
+        self.dataRegister_menu.add_command(label="View in Bin")
+        self.dataRegister_menu.add_command(label="View in Hex")
+        self.dataRegister_menu.add_command(label="View in Dec")
+        self.menubar.add_cascade(label="Data Register",
+                                 menu=self.dataRegister_menu)
+
+        self.addressRegister_menu = Menu(self.menubar, tearoff=0)
+        self.addressRegister_menu.add_command(label="View in Bin")
+        self.addressRegister_menu.add_command(label="View in Hex")
+        self.addressRegister_menu.add_command(label="View in Dec")
+        self.menubar.add_cascade(label="Address Register",
+                                 menu=self.dataRegister_menu)
+
     def windowsize(self):  # DEBUG Purposes
         print("height", self.master.winfo_height())
         print("width", self.master.winfo_width())
 
-    def loadfile(self, memory=None):
+    def reset_line(self):
+        self.current_line_number = 1
+        self.Code_View_lbl.tag_remove("current_line", 1.0, "end")
+        self.Code_View_lbl.tag_add("current_line", 1.0, 2.0)
+
+    def next_line(self):  # TODO: Constrain next line to max num of lines
+        self.current_line_number += 1
+        highlight_start = str(self.current_line_number) + ".0"
+        highlight_end = str(self.current_line_number + 1) + ".0"
+        self.Code_View_lbl.tag_remove("current_line", 1.0, "end")
+        self.Code_View_lbl.tag_add("current_line", highlight_start,
+                                   highlight_end)
+
+    def loadfile(self):
         """
         Loads in a .s file at that is currently in the same directory as
         SimulatorMain.py and displays the text in the Text widget, additionally
@@ -146,5 +181,9 @@ class simulator_gui:
         """
         assembler = AssemblyFileReader('test.s')
         file_data = assembler.parse_file('test.s')
+        print(file_data)
         self.Code_View_lbl.delete(1.0, END)  # Clear text
         self.Code_View_lbl.insert(END, file_data)  # Insert the file text
+        self.Code_View_lbl.tag_configure("current_line", background="#e9e9e9")
+        self.Code_View_lbl.tag_remove("current_line", 1.0, "end")
+        self.Code_View_lbl.tag_add("current_line", 1.0, 2.0)
