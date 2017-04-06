@@ -43,47 +43,9 @@ class DataRegister():
         #     for i in range(size):
         #         self._val[i] = b_arr.pop()
 
-
 class AddressRegister(DataRegister):
-    '''
-    Uses inheritance to create address registers that account for address
-    wrapping.
-    '''
     def __init__(self):
         super().__init__()
-
-    def set(self, index, val, size):
-        self._register[index][1] = val
-        # if index not in self._register:
-        #     pass  # TODO: give error
-        # if size == 4:
-        #     # b_arr = bytearray(val)
-        #     b_arr = val
-        #     for i in range(size):
-        #         self._register[index][i] = b_arr.pop()
-        # elif size == 2:
-        #     # b_arr = bytearray([val])
-        #     # print(b_arr)
-        #     b_arr = val
-        #
-        #     if b_arr[-1] == 1:  # Check if sign extension necessary.
-        #         sign_extend = True
-        #     else:
-        #         sign_extend = False
-        #
-        #     for i in range(size):  # Fill up memory
-        #         self._register[index][i] = b_arr.pop()
-        #
-        #     if sign_extend:  # Sign extend accordingly
-        #         for i in range(size):
-        #             self._register[index][i] = 1
-        #     else:
-        #         for i in range(size):
-        #             self._register[index][i] = 1
-        #
-        # else:
-        #     pass  # TODO: Error
-
 
 D = dict()
 A = dict()
