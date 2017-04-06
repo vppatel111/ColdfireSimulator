@@ -180,8 +180,9 @@ class simulator_gui:
         it calls an unparser to process the file.
         """
         assembler = AssemblyFileReader('test.s')
-        file_data = assembler.parse_file('test.s')
-        print(file_data)
+        assembler.read_into_list()
+        file_data = ''
+        for e in assembler._file: file_data += e
         self.Code_View_lbl.delete(1.0, END)  # Clear text
         self.Code_View_lbl.insert(END, file_data)  # Insert the file text
         self.Code_View_lbl.tag_configure("current_line", background="#e9e9e9")

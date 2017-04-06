@@ -6,21 +6,6 @@ class DataRegister():
     def __init__(self):
         self._val = 0
 
-    # def add_register(self, index, value = 0):
-    #     if index not in self._register:
-    #         self._register[index] = self.split_val(value)
-
-    def split_val(self, val):
-        return [(val >> i & 0xff) for i in (0, 8, 16, 24)]
-
-    def cat_val(self, v_arr):
-        tmp = v_arr
-        val = 0
-        for i in (0, 8, 16, 24):
-            if tmp != []:
-                val += tmp.pop() << i
-        return val
-
     def get(self):
         # return self.cat_val(self._val)
         return self._val
@@ -36,16 +21,68 @@ class DataRegister():
             v = self._val & 0x00000000
             val &= 0xffffffff
         self._val = v + val
-        # if index not in self._register:
-            # pass # TODO: give error
-        # if size <= 4 and size >= 1:
-        #     b_arr = self.split_val(val)
-        #     for i in range(size):
-        #         self._val[i] = b_arr.pop()
 
 class AddressRegister(DataRegister):
     def __init__(self):
         super().__init__()
+
+class CCR():
+    def __init__(self):
+        self._val = 0
+
+    def auto_assign(self, v, X = None):
+        N = Z = V = C = None
+        # check for negative
+        if v < 0:   N = True
+        else:       N = False
+        # check for zero
+        if v == 0:  Z = True
+        else:       Z = False
+        # check for overflow
+
+        # check for carry
+
+    def set(self, X = None, N = None, Z = None, V = None, C = None):
+        if X is not None:
+            self.assign_X(X)
+        if N is not None:
+            self.assign_N(N)
+        if Z is not None:
+            self.assign_Z(Z)
+        if V is not None:
+            self.assign_V(V)
+        if C is not None:
+            self.assign_C(C)
+
+    def assign_X(self, x):
+        if x == True:
+            self._val |= 0b10000
+        else:
+            self._val &= 0b01111
+
+    def assign_N(self, n):
+        if n == True:
+            self._val |= 0b01000
+        else:
+            self._val &= 0b10111
+
+    def assign_Z(self, z):
+        if z == True:
+            self._val |= 0b00100
+        else:
+            self._val &= 0b11011
+
+    def assign_V(self, v):
+        if v == True:
+            self._val |= 0b00010
+        else:
+            self._val &= 0b11101
+
+    def assign_C(self, c):
+        if c == True:
+            self._val |= 0b00001
+        else:
+            self._val &= 0b11110
 
 D = dict()
 A = dict()
@@ -55,6 +92,7 @@ for i in range(8):
     A[i] = AddressRegister()
 
 PC = AddressRegister()
+ccr = CCR()
 # source/dest type dictionary
 sd_type_dict = {
         r'%a': lambda i: A.get(i), # address register
