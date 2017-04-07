@@ -9,11 +9,14 @@
 
 from tkinter import *
 from unparser import AssemblyFileReader
+from CPU import CPU
 
 
 class simulator_gui:
 
     def __init__(self, master):
+
+        self.CPU = CPU()
 
         self.master = master
         master.title("ColdFire Simulator")
@@ -45,7 +48,8 @@ class simulator_gui:
         self.extension1_lbl = Label(master, text="Extension 1:", font=("FreeSans", 15))
         self.extension1_lbl.grid(row=3, column=1)
 
-        self.extension1_value_lbl = Label(master, text="123456789012345", font=("FreeSans", 15))
+        self.extension1_value_lbl = Label(master, text="123456789012345",
+                                          font=("FreeSans", 15))
         self.extension1_value_lbl.grid(row=3, column=2)
 
         self.extension2_lbl = Label(master, text="Extension 2:", font=("FreeSans", 15))
@@ -166,7 +170,14 @@ class simulator_gui:
         self.Code_View_lbl.tag_add("current_line", 1.0, 2.0)
 
     def next_line(self):  # TODO: Constrain next line to max num of lines
+        self.CPU.execute_line(self.current_line_number)
+        changes = self.CPU.check_for_change()
+
+        if changes:  # If there are changes, display and highlight them
+            self.display_register_changes(changes)
+
         self.current_line_number += 1
+
         highlight_start = str(self.current_line_number) + ".0"
         highlight_end = str(self.current_line_number + 1) + ".0"
         self.Code_View_lbl.tag_remove("current_line", 1.0, "end")
@@ -182,9 +193,17 @@ class simulator_gui:
         assembler = AssemblyFileReader('test.s')
         assembler.read_into_list()
         file_data = ''
-        for e in assembler._file: file_data += e
+        for e in assembler._file:  # Create a large formatted string to be disp
+            file_data += e
         self.Code_View_lbl.delete(1.0, END)  # Clear text
         self.Code_View_lbl.insert(END, file_data)  # Insert the file text
         self.Code_View_lbl.tag_configure("current_line", background="#e9e9e9")
         self.Code_View_lbl.tag_remove("current_line", 1.0, "end")
         self.Code_View_lbl.tag_add("current_line", 1.0, 2.0)
+
+    def display_register_changes(self, changes):
+        for change in changes:
+            if change[0] == "D":
+                self.dataRegisters[int(change[1])].config(text=changes[change])
+            elif change[0] == "A":
+                self.addressRegisters[int(change[1])].config(text=changes[change])

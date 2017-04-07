@@ -11,6 +11,7 @@ size_dict = {
 		'b' : 1,
 }
 
+
 class Command(Resources):
 	'''
 	The base command file that contains the common attributes for all the commands
@@ -40,9 +41,17 @@ class Command(Resources):
 			'bpl':		lambda: self.bpl(),
 			'bmi':		lambda: self.bmi(),
 
+			# Extra: Bit tests and do something functions.
+			# 'bchg':		lambda: self.bchg(),
+			# 'bclr':		lambda: self.bclr(),
+			# 'bset':		lambda: self.bset(),
+			# 'btst':		lambda: self.btst(),
+
 			'add':		lambda: self.add(),
 			'adda':		lambda: self.adda(),
-			'addi':		lambda: self.addi(),
+			'addi':		lambda: self.addi(),  # Extra
+			'addq':		lambda: self.addi(),  # Extra
+			'addx':		lambda: self.addi(),  # Extra
 
 			'sub':		lambda: self.sub(),
 			'suba':		lambda: self.suba(),
@@ -55,6 +64,7 @@ class Command(Resources):
 			'asr':		lambda: self.asr(),
 
 			'and':		lambda: self._and(),
+			'andi':		lambda: self._and(), # Extra
 			'or':		lambda: self._or(),
 			'eor':		lambda: self._eor(),
 			'not':		lambda: self._not(),
@@ -121,16 +131,50 @@ class Command(Resources):
 		pass
 
 	def add(self):
-		pass
+		# Adds any source and destination together.
+		# BUG: Does not account for overflow etc.
+		s = self.get_source()
+		d = self.get_dest()
+		z = self.size
+		if z == 1:
+			s &= 0xff
+		elif z == 2:
+			s &= 0xffff
+		elif z == 4:
+			s &= 0xffffffff
+		self.set_dest(s+d, z)
 
 	def adda(self):
 		pass
 
 	def addi(self):
-		pass
+		# Adds any source and destination together.
+		# BUG: Does not account for overflow etc.
+		# TODO: Errors?
+		s = self.get_source()
+		d = self.get_dest()
+		z = self.size
+		if z == 1:
+			s &= 0xff
+		elif z == 2:
+			s &= 0xffff
+		elif z == 4:
+			s &= 0xffffffff
+		self.set_dest(s+d, z)
 
 	def sub(self):
-		pass
+		# Subtracts any source and destination together.
+		# BUG: Does not account for overflow etc.
+		s = self.get_source()
+		d = self.get_dest()
+		z = self.size
+		if z == 1:
+			s &= 0xff
+		elif z == 2:
+			s &= 0xffff
+		elif z == 4:
+			s &= 0xffffffff
+		self.set_dest(s-d, z)
 
 	def suba(self):
 		pass

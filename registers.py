@@ -22,9 +22,11 @@ class DataRegister():
             val &= 0xffffffff
         self._val = v + val
 
+
 class AddressRegister(DataRegister):
     def __init__(self):
         super().__init__()
+
 
 class CCR():
     def __init__(self):
