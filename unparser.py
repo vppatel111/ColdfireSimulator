@@ -1,9 +1,12 @@
-DEBUG = True
 import re
 from commands import *
 from registers import *
 from memory import *
 from resources import Resources
+
+DEBUG = True
+
+
 class line(Resources):
     '''
     The line object contains and handles all the processing of the assembly line
@@ -29,13 +32,13 @@ class line(Resources):
 
         #TODO: need more testing!!!
     '''
-    def __init__(self, l = None, c = None, z = None, s = None, d = None):
+    def __init__(self, l=None, c=None, z=None, s=None, d=None):
         self.label = l
         self.size = z
         self.source = s
         self.dest = d
         self.command = c
-        self.review()
+        # self.review() - Temporarily disabling auto-review (Add as a feature)
 
     def review(self):
         '''
@@ -51,6 +54,7 @@ class line(Resources):
         d = self.get_dest()
         # print(self.source, self.dest)
         if DEBUG and print("SOURCE: {} , DEST: {}".format(s, d)): pass
+
 
 class AssemblyFileReader():
     '''

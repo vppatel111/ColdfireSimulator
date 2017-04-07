@@ -24,8 +24,8 @@ a large list (line by line), this will be used by the GUI to display a file.
 # memory.print_block(1)
 # print("mem1: ", memory.get_block(1))
 # print("mem2: ", memory.get_block(3))
-assembler = AssemblyFileReader('test.s')
-assembler.read_into_list()
+# assembler = AssemblyFileReader('test.s')
+# assembler.read_into_list()
 
 
 Simulator_GUI = simulator_gui(root)  # Start up GUI
