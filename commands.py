@@ -24,88 +24,87 @@ class Command(Resources):
 		self.dest = d
 
 		command_dict = {
-			'''Data Manipulation Commands '''
-			'move': 	lambda: self.move(),
-			'movea':	lambda: self.movea(),
-			# 'moveq':	lambda: self.moveq(), -- Extra
-			# 'movem':	lambda: self.movem(), -- Extra
-			# 'move ccr':		lambda: self.move_ccr(), -- Extra
+		  # Data Manipulation Commands
+		  'move': 	lambda: self.move(),
+		  'movea':	lambda: self.movea(),
+		  # 'moveq':	lambda: self.moveq(), -- Extra
+		  # 'movem':	lambda: self.movem(), -- Extra
+		  # 'move ccr':		lambda: self.move_ccr(), -- Extra
 
-			''' Stack Manipulation/Address Affecting Commands'''
-			'lea':		lambda: self.lea(),  # Necessary
-			'pea':		lambda: self.pea(),  # Necessary
+		  # Stack Manipulation/Address Affecting Commands
+		  'lea':		lambda: self.lea(),  # Necessary
+		  'pea':		lambda: self.pea(),  # Necessary
 
-			'''Branching Commands '''
-			'bra':		lambda: self.bra(),
-			'bne':		lambda: self.bne(),
-			'beq':		lambda: self.beq(),
-			'ble':		lambda: self.ble(),
-			'bge':		lambda: self.bge(),
-			'blt':		lambda: self.blt(),
-			'bgt':		lambda: self.bgt(),
-			'bcc':		lambda: self.bcc(),+
-			'bcs':		lambda: self.bcs(),
-			'bvc':		lambda: self.bvc(),
-			'bvs':		lambda: self.bvs(),
-			'bpl':		lambda: self.bpl(),
-			'bmi':		lambda: self.bmi(),
-			# 'link':		lambda: self.link(),
-			# 'unlk':		lambda: self.unlk(),
+		  # Branching Commands
+		  'bra':		lambda: self.bra(),
+		  'bne':		lambda: self.bne(),
+		  'beq':		lambda: self.beq(),
+		  'ble':		lambda: self.ble(),
+		  'bge':		lambda: self.bge(),
+		  'blt':		lambda: self.blt(),
+		  'bgt':		lambda: self.bgt(),
+		  'bcc':		lambda: self.bcc(),
+		  'bcs':		lambda: self.bcs(),
+		  'bvc':		lambda: self.bvc(),
+		  'bvs':		lambda: self.bvs(),
+		  'bpl':		lambda: self.bpl(),
+		  'bmi':		lambda: self.bmi(),
+		  # 'link':		lambda: self.link(),
+		  # 'unlk':		lambda: self.unlk(),
 
 
-			# Extra: Bit tests and do something functions.
-			# 'bchg':		lambda: self.bchg(),
-			# 'bclr':		lambda: self.bclr(),
-			# 'bset':		lambda: self.bset(),
-			# 'btst':		lambda: self.btst(),
+		  # Extra: Bit tests and do something functions.
+		  # 'bchg':		lambda: self.bchg(),
+		  # 'bclr':		lambda: self.bclr(),
+		  # 'bset':		lambda: self.bset(),
+		  # 'btst':		lambda: self.btst(),
 
-			''' Arithmetic Commands '''
-			'add':		lambda: self.add(),
-			'adda':		lambda: self.adda(),
-			# 'addi':		lambda: self.addi(),  -- Extra
-			# 'addq':		lambda: self.addi(),  -- Extra
-			# 'addx':		lambda: self.addi(),  -- Extra
+		  # Arithmetic Commands
+		  'add':		lambda: self.add(),
+		  'adda':		lambda: self.adda(),
+		  # 'addi':		lambda: self.addi(),  -- Extra
+		  # 'addq':		lambda: self.addi(),  -- Extra
+		  # 'addx':		lambda: self.addi(),  -- Extra
 
-			'sub':		lambda: self.sub(),
-			'suba':		lambda: self.suba(),
-			# 'subi':		lambda: self.subi(), -- Extra
-			# 'subq':		lambda: self.subq(), -- Extra
-			# 'subx':		lambda: self.subx(), -- Extra
+		  'sub':		lambda: self.sub(),
+		  'suba':		lambda: self.suba(),
+		  # 'subi':		lambda: self.subi(), -- Extra
+		  # 'subq':		lambda: self.subq(), -- Extra
+		  # 'subx':		lambda: self.subx(), -- Extra
 
-			'divs':		lambda: self.divs(),  # Necessary
-			'divu':		lambda: self.divu(),  # Necessary
+		  'divs':		lambda: self.divs(),  # Necessary
+		  'divu':		lambda: self.divu(),  # Necessary
 
-			'muls':		lambda: self.muls(),  # Necessary
-			'mulu':		lambda: self.mulu(),  # Necessary
+		  'muls':		lambda: self.muls(),  # Necessary
+		  'mulu':		lambda: self.mulu(),  # Necessary
 
-			'clr':		lambda: self.clr(),
+		  'clr':		lambda: self.clr(),
 
-			''' Logical Commands '''
-			'asl':		lambda: self.asl(),
-			'asr':		lambda: self.asr(),
+		  # Logical Commands
+		  'asl':		lambda: self.asl(),
+		  'asr':		lambda: self.asr(),
 
-			'and':		lambda: self._and(),
-			# 'andi':		lambda: self._and(), -- Extra
+		  'and':		lambda: self._and(),
+		  # 'andi':		lambda: self._and(), -- Extra
 
-			'or':		lambda: self._or(),
-			# 'ori':		lambda: self._ori(),
-			'eor':		lambda: self._eor(),
-			# 'eori':		lambda: self._eori(), -- Extra
+		  'or':		lambda: self._or(),
+		  # 'ori':		lambda: self._ori(),
+		  'eor':		lambda: self._eor(),
+		  # 'eori':		lambda: self._eori(), -- Extra
 
-			'not':		lambda: self._not(),
-			'neg':		lambda: self.neg(),
-			# 'negx':		lambda: self.neg(), -- Extra
+		  'not':		lambda: self._not(),
+		  'neg':		lambda: self.neg(),
+		  # 'negx':		lambda: self.neg(), -- Extra
 
-			'cmp':		lambda: self.cmp(),
-			'cmpa':		lambda: self.cmpa(),
-			'cmpi':		lambda: self.cmpi(),
+		  'cmp':		lambda: self.cmp(),
+		  'cmpa':		lambda: self.cmpa(),
+		  'cmpi':		lambda: self.cmpi(),
 
-			''' Miscellaneous Commands '''
-			# 'tas':		lambda: self._tas(),
-			# 'tst':		lambda: self._tst(),
-			'nop':		lambda: self._nop()
-
-			}
+		  # Miscellaneous Commands 
+		  # 'tas':		lambda: self._tas(),
+		  # 'tst':		lambda: self._tst(),
+		  'nop':		lambda: self._nop()
+		 }
 		if c in command_dict:
 			command_dict[c]()
 
@@ -246,7 +245,4 @@ class Command(Resources):
 		pass
 
 	def cmpi(self):
-		pass
-
-	def nop(self):
 		pass
