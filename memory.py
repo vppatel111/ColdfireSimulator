@@ -35,6 +35,11 @@ class Memory():
     def __init__(self):
         self._mem = dict()
 
+    def get_EA(self, address):
+        if address not in self._mem:
+            self._mem[address] = EffectiveAddress(address)
+        return self._mem[address]
+
     def get(self, address, size=1):
         v = 0
         for z in range(size):

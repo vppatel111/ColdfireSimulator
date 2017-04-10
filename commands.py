@@ -3,6 +3,7 @@ This contains all the commands related to assembly language.
 See Coldfire Manual for full details on how commands work.
 '''
 from resources import Resources
+from registers import *
 DEBUG = True
 # dictionary of sizes
 size_dict = {
@@ -100,7 +101,7 @@ class Command(Resources):
 		  'cmpa':		lambda: self.cmpa(),
 		  'cmpi':		lambda: self.cmpi(),
 
-		  # Miscellaneous Commands 
+		  # Miscellaneous Commands
 		  # 'tas':		lambda: self._tas(),
 		  # 'tst':		lambda: self._tst(),
 		  'nop':		lambda: self._nop()
@@ -122,45 +123,149 @@ class Command(Resources):
 			d &= 0x00000000
 			s &= 0xffffffff
 		self.set_dest(s+d, z)
+		new_d = self.get_dest()
+		# CCR: - * * 0 0
+		ccr.set(N = ccr.check_N(new_d), Z = ccr.check_Z(new_d), V = 0, C = 0)
 
 	def movea(self):
 		pass
 
 	def bra(self):
-		pass
+		# GUARD:
+		if not pc.is_valid_label(self.source):
+			raise Exception('The label: "{}" does not exist!'.format(self.source))
+		# exec command:
+		else:
+			pc.label_to_line_n(self.source)
+		# CCR: - - - - -
 
 	def bne(self):
-		pass
+		# GUARD: None
+		# exec command:
+		Z = ccr.get_Z()
+		if Z == 0:
+			self.bra()
+		else:
+			pass
+		# CCR: - - - - -
 
 	def beq(self):
-		pass
+		# GUARD: None
+		# exec command:
+		Z = ccr.get_Z()
+		if Z == 1:
+			self.bra()
+		else:
+			pass
+		# CCR: - - - - -
 
 	def ble(self):
-		pass
+		# GUARD = None
+		# exec command:
+		Z = ccr.get_Z()
+		N = ccr.get_N()
+		V = ccr.get_V()
+		if (Z == 1 or (N == 1 and V == 0) or (N == 0 and V == 1)):
+			self.bra()
+		else:
+			pass
+		# CCR: - - - - -
 
 	def bge(self):
-		pass
+		# GUARD = None
+		# exec command:
+		Z = ccr.get_Z()
+		N = ccr.get_N()
+		V = ccr.get_V()
+		if (Z == 1 or (N == 1 and V == 1) or (N == 0 and V == 0)):
+			self.bra()
+		else:
+			pass
+		# CCR: - - - - -
 
 	def blt(self):
-		pass
+		# GUARD = None
+		# exec command:
+		Z = ccr.get_Z()
+		N = ccr.get_N()
+		V = ccr.get_V()
+		if ((N == 1 and V == 0) or (N == 0 and V == 1)):
+			self.bra()
+		else:
+			pass
+		# CCR: - - - - -
 
 	def bgt(self):
-		pass
+		# GUARD = None
+		# exec command:
+		Z = ccr.get_Z()
+		N = ccr.get_N()
+		V = ccr.get_V()
+		if ((Z == 0 and N == 1 and V == 1) or (Z == 0 and N == 0 and V == 0)):
+			self.bra()
+		else:
+			pass
+		# CCR: - - - - -
 
 	def bcc(self):
-		pass
+		# GUARD = None
+		# exec command:
+		C = ccr.get_C()
+		if C == 0:
+			self.bra()
+		else:
+			pass
+		# CCR: - - - - -
 
 	def bcs(self):
-		pass
+		# GUARD = None
+		# exec command:
+		C = ccr.get_C()
+		if C == 1:
+			self.bra()
+		else:
+			pass
+		# CCR: - - - - -
 
 	def bvs(self):
-		pass
+		# GUARD = None
+		# exec command:
+		V = ccr.get_V()
+		if V == 1:
+			self.bra()
+		else:
+			pass
+		# CCR: - - - - -
+
+	def bvc(self):
+		# GUARD = None
+		# exec command:
+		V = ccr.get_V()
+		if V == 0:
+			self.bra()
+		else:
+			pass
+		# CCR: - - - - -
 
 	def bpl(self):
-		pass
+		# GUARD = None
+		# exec command:
+		N = ccr.get_N()
+		if N == 0:
+			self.bra()
+		else:
+			pass
+		# CCR: - - - - -
 
 	def bmi(self):
-		pass
+		# GUARD = None
+		# exec command:
+		N = ccr.get_N()
+		if N == 1:
+			self.bra()
+		else:
+			pass
+		# CCR: - - - - -
 
 	def add(self):
 		# Adds any source and destination together.

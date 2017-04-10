@@ -49,10 +49,10 @@ class line(Resources):
                     both the command_dict as well as its method command.
         '''
         # execute command:
+        if DEBUG and print(self.label, self.command, self.size, self.source, self.dest): pass
         Command(self.command, self.size, self.source, self.dest)
         s = self.get_source()
         d = self.get_dest()
-        # print(self.source, self.dest)
         if DEBUG and print("SOURCE: {} , DEST: {}".format(s, d)): pass
 
 
@@ -163,7 +163,7 @@ class AssemblyFileReader():
             i = int(c.match(v).group('register'))
             v = A[i].get()
             A[i].set(v - z, 4)
-            return memory.get(A[i].get())
+            return memory.get_EA(A[i].get())
 
         elif s.endswith('+'):
             v = s[:-1]
@@ -175,7 +175,7 @@ class AssemblyFileReader():
             i = int(c.match(v).group('register'))
             v = A[i].get() # get value from address register
             A[i].set(v + z, 4)
-            return memory.get(v) # get effective address
+            return memory.get_EA(v) # get effective address
 
         elif s.startswith('(') and s.endswith(')'):
             v = s[1:-1]
@@ -185,14 +185,14 @@ class AssemblyFileReader():
                 \(
                 (?P<offset>\d),
                 %a(?P<address>\d),
-                %d(?P<scale>\d)
+                (%d(?P<scale>\d)\s*(\*\s*(?P<factor>\d))?)
                 \)
                 """, re.VERBOSE)
                 offset = int(c.match(s).group('offset'))
                 i = int(c.match(s).group('address'))
                 scale = int(c.match(s).group('scale'))
                 # factor = int(c.match(s).group('factor'))
-                return memory.get(offset+A[i].get()+scale)#*factor)
+                return memory.get_EA(offset+A[i].get()+scale)#*factor)
             elif l == 2:
                 c = re.compile(r"""
                 \(
@@ -202,7 +202,7 @@ class AssemblyFileReader():
                 """, re.VERBOSE)
                 offset = int(c.match(s).group('offset'))
                 i = int(c.match(s).group('address'))
-                return memory.get(offset+A[i].get())
+                return memory.get_EA(offset+A[i].get())
             elif l == 1:
                 c = re.compile(r"""
                 \(
@@ -210,21 +210,41 @@ class AssemblyFileReader():
                 \)
                 """, re.VERBOSE)
                 i = int(c.match(s).group('address'))
-                return memory.get(A[i].get())
+                return memory.get_EA(A[i].get())
 
         else:
-            for t in sd_type_dict:
-                if s.startswith(t):
-                    v = s.replace(t, '')
-                    if v.startswith('0x'):
-                        v = int(v, 16)
-                    elif v.startswith('0b'):
-                        v = int(v, 2)
-                    elif v.startswith('0o'):
-                        v = int(v, 8)
-                    else:
-                        v = int(v)
-                    return sd_type_dict[t](v)
+            if s.startswith('#'):
+                v = s[1:]
+                if v.startswith('0x'):
+                    v = int(v, 16)
+                elif v.startswith('0b'):
+                    v = int(v, 2)
+                elif v.startswith('0o'):
+                    v = int(v, 8)
+                else:
+                    v = int(v)
+                return v
+
+            elif s.startswith('%a'):
+                return A[int(s[2:])]
+            elif s.startswith('%d'):
+                return D[int(s[2:])]
+            elif s.startswith('0x'):
+                v = int(v, 16)
+                return memory.get_EA(v)
+            elif s.startswith('0b'):
+                v = int(v, 2)
+                return memory.get_EA(v)
+            elif s.startswith('0o'):
+                v = int(v, 8)
+                return memory.get_EA(v)
+        try:
+            return int(s)
+        except:
+            return s
 
 assembler = AssemblyFileReader('test.s')
 assembler.read_into_list()
+pc._line = assembler._line_p
+pc._label_dict = assembler._label_dict
+pc.exec_line()
