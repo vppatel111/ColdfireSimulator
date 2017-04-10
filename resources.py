@@ -4,6 +4,8 @@ from memory import *
 
 class Resources():
     '''
+    This class contains all the frequently used methods that other classes may
+    potentially need.
     '''
     def get_source(self, o = None):
         '''
@@ -12,7 +14,7 @@ class Resources():
         if o != None:
             self.source = o
         if isinstance(self.source, EffectiveAddress):
-            return self.source.get()
+            return self.source.get(self.size)
         elif isinstance(self.source, DataRegister):
             return self.source.get()
         elif isinstance(self.source, AddressRegister):
@@ -30,7 +32,7 @@ class Resources():
             return self.dest.get()
         elif isinstance(self.dest, DataRegister):
             return self.dest.get()
-        elif isinstance(self.source, AddressRegister):
+        elif isinstance(self.dest, AddressRegister):
             return self.dest.get()
         else:
             return self.dest
@@ -39,7 +41,7 @@ class Resources():
         '''
         Returns:        None
         Side effects:   Changes the value of the number stored in the destination.
-        NOTE:   This method is mainly used set the new destination after applying
+        NOTE:   This method is mainly used to set the new destination after applying
                 the command.
         '''
         if isinstance(self.dest, EffectiveAddress):

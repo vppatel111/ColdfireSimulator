@@ -1,9 +1,9 @@
 from memory import Memory
 # from registers import DataRegister, AddressRegister, CCR
-import registers
+from registers import DataRegister, AddressRegister, CCR, ProgramCounter
 from commands import *
 from unparser import AssemblyFileReader, line
-from program_counter import Program_Counter
+# from program_counter import Program_Counter
 
 
 class CPU():
@@ -13,12 +13,13 @@ class CPU():
     """
     def __init__(self):
         self.memory = Memory()  # Initialize memory
-        self.PC = Program_Counter()  # Initialize program counter
 
         # Read in and store code.
         self.assembler = AssemblyFileReader('test.s')
         self.assembler.read_into_list()
         self.assembley_code = self.assembler._line_p
+
+        self.pc = ProgramCounter(self.assembler._line_p, self.assembler._label_dict)  # Initialize program counter
 
         self.current_dataR_values = dict()
         self.current_addressR_values = dict()
