@@ -185,7 +185,7 @@ class AssemblyFileReader():
                 \(
                 (?P<offset>\d),
                 %a(?P<address>\d),
-                %d(?P<scale>\d)
+                (%d(?P<scale>\d)\s*(\*\s*(?P<factor>\d))?)
                 \)
                 """, re.VERBOSE)
                 offset = int(c.match(s).group('offset'))
@@ -213,19 +213,35 @@ class AssemblyFileReader():
                 return memory.get_EA(A[i].get())
 
         else:
-            for t in sd_type_dict:
-                if s.startswith(t):
-                    v = s.replace(t, '')
-                    if v.startswith('0x'):
-                        v = int(v, 16)
-                    elif v.startswith('0b'):
-                        v = int(v, 2)
-                    elif v.startswith('0o'):
-                        v = int(v, 8)
-                    else:
-                        v = int(v)
-                    return sd_type_dict[t](v)
-        return s
+            if s.startswith('#'):
+                v = s[1:]
+                if v.startswith('0x'):
+                    v = int(v, 16)
+                elif v.startswith('0b'):
+                    v = int(v, 2)
+                elif v.startswith('0o'):
+                    v = int(v, 8)
+                else:
+                    v = int(v)
+                return v
+
+            elif s.startswith('%a'):
+                return A[int(s[2:])]
+            elif s.startswith('%d'):
+                return D[int(s[2:])]
+            elif s.startswith('0x'):
+                v = int(v, 16)
+                return memory.get_EA(v)
+            elif s.startswith('0b'):
+                v = int(v, 2)
+                return memory.get_EA(v)
+            elif s.startswith('0o'):
+                v = int(v, 8)
+                return memory.get_EA(v)
+        try:
+            return int(s)
+        except:
+            return s
 
 assembler = AssemblyFileReader('test.s')
 assembler.read_into_list()

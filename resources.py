@@ -50,3 +50,13 @@ class Resources():
             self.dest.set(val, size)
         elif isinstance(self.dest, AddressRegister):
             self.dest.set(val, size)
+
+    def sign_extend(val):
+        '''
+        Sign extends val then returns new val. The extension only works for
+        word sized val.
+        '''
+        extension_bit = (val >> 15)&1
+        if extension_bit == 1 and val <= 0xFFFF:
+            val |= 0xFFFF0000
+        return val
