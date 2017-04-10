@@ -1,6 +1,7 @@
 from memory import Memory
 # from registers import DataRegister, AddressRegister, CCR
-from registers import DataRegister, AddressRegister, CCR, ProgramCounter
+# from registers import DataRegister, AddressRegister, CCR, ProgramCounter
+import registers
 from commands import *
 from unparser import AssemblyFileReader, line
 # from program_counter import Program_Counter
