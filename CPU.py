@@ -27,6 +27,8 @@ class CPU():
             self.current_dataR_values[i] = 0
             self.current_addressR_values[i] = 0
 
+        print(self.current_dataR_values, self.current_addressR_values)
+
     def execute_line(self, line_num):
         """
         Note: Line_num is not zero indexed and the dictionary is.
@@ -47,7 +49,9 @@ class CPU():
         for i in range(8):
             if self.current_dataR_values[i] != registers.D[i].get():
                 changes['D' + str(i)] = registers.D[i].get()
+                self.current_dataR_values[i] = registers.D[i].get()
             if self.current_addressR_values[i] != registers.A[i].get():
                 changes['A' + str(i)] = registers.A[i].get()
+                self.current_addressR_values[i] = registers.A[i].get()
 
         return changes
