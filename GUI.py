@@ -23,6 +23,9 @@ class simulator_gui:
         # master.resizeable(width=False, height=False)
         master.geometry('{}x{}'.format(1400, 889))  # width x height
 
+        self.address_view = "dec"
+        self.data_view = "dec"
+
         # Text box for code
         self.Code_View_lbl = Text(master, width=100, height=60)
         self.Code_View_lbl.insert(END, "Test")
@@ -68,7 +71,7 @@ class simulator_gui:
         self.addressRegisters = []
         for _ in range(7):
             self.addressRegisters.append(Label(master, text="0x12345678901234567890123456789012",
-                                               font=("FreeSans", 12), padx=10, relief=SUNKEN))
+                                               font=("FreeSans", 12), padx=10))
 
         counter = 0
         for label in self.addressRegisters:
@@ -147,22 +150,63 @@ class simulator_gui:
         self.master.config(menu=self.menubar)
 
         self.dataRegister_menu = Menu(self.menubar, tearoff=0)
-        self.dataRegister_menu.add_command(label="View in Bin")
-        self.dataRegister_menu.add_command(label="View in Hex")
-        self.dataRegister_menu.add_command(label="View in Dec")
+        self.dataRegister_menu.add_command(label="View in Bin",
+        command=lambda view="bin": self.set_dataRegister_view(view))
+
+        self.dataRegister_menu.add_command(label="View in Hex",
+        command=lambda view="hex": self.set_dataRegister_view(view))
+
+        self.dataRegister_menu.add_command(label="View in Dec",
+        command=lambda view="dec": self.set_dataRegister_view(view))
+
         self.menubar.add_cascade(label="Data Register",
                                  menu=self.dataRegister_menu)
 
         self.addressRegister_menu = Menu(self.menubar, tearoff=0)
-        self.addressRegister_menu.add_command(label="View in Bin")
-        self.addressRegister_menu.add_command(label="View in Hex")
-        self.addressRegister_menu.add_command(label="View in Dec")
+        self.addressRegister_menu.add_command(label="View in Bin",
+        command=lambda view="bin": self.set_addressRegister_view(view))
+
+        self.addressRegister_menu.add_command(label="View in Hex",
+        command=lambda view="hex": self.set_addressRegister_view(view))
+
+        self.addressRegister_menu.add_command(label="View in Dec",
+        command=lambda view="dec": self.set_addressRegister_view(view))
+
         self.menubar.add_cascade(label="Address Register",
-                                 menu=self.dataRegister_menu)
+                                 menu=self.addressRegister_menu)
 
     def windowsize(self):  # DEBUG Purposes
         print("height", self.master.winfo_height())
         print("width", self.master.winfo_width())
+
+    def set_dataRegister_view(self, view):
+
+        self.data_view = view
+
+        for i in range(7):
+            # print(self.CPU.current_dataR_values[i])
+            if view == "bin":
+                self.dataRegisters[i].config(text=bin(self.CPU.current_dataR_values[i]))
+            elif view == "hex":
+                self.dataRegisters[i].config(text=hex(self.CPU.current_dataR_values[i]))
+            else:
+                self.dataRegisters[i].config(text=(self.CPU.current_dataR_values[i]))
+
+    def set_addressRegister_view(self, view):
+
+        self.address_view = view
+
+        for i in range(7):
+            # print(self.CPU.current_addressR_values[i])
+            if view == "bin":
+                self.addressRegisters[i].config(
+                                text=bin(self.CPU.current_addressR_values[i]))
+            elif view == "hex":
+                self.addressRegisters[i].config(
+                                text=hex(self.CPU.current_addressR_values[i]))
+            else:
+                self.addressRegisters[i].config(
+                                text=(self.CPU.current_addressR_values[i]))
 
     def reset_line(self):
         self.current_line_number = 1
@@ -204,6 +248,16 @@ class simulator_gui:
     def display_register_changes(self, changes):
         for change in changes:
             if change[0] == "D":
-                self.dataRegisters[int(change[1])].config(text=changes[change])
+                if self.data_view == "bin":
+                    self.dataRegisters[int(change[1])].config(text=bin(changes[change]))
+                elif self.data_view == "hex":
+                    self.dataRegisters[int(change[1])].config(text=hex(changes[change]))
+                else:
+                    self.dataRegisters[int(change[1])].config(text=changes[change])
             elif change[0] == "A":
-                self.addressRegisters[int(change[1])].config(text=changes[change])
+                if self.address_view == "bin":
+                    self.addressRegisters[int(change[1])].config(text=bin(changes[change]))
+                elif self.address_view == "hex":
+                    self.addressRegisters[int(change[1])].config(text=hex(changes[change]))
+                else:
+                    self.addressRegisters[int(change[1])].config(text=changes[change])
