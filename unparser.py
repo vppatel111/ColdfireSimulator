@@ -38,6 +38,9 @@ class line(Resources):
         self.source = s
         self.dest = d
         self.command = c
+        self.s_inc = None # if the source is an EA, is being incremented/decremented in this line?
+        self.d_inc = None # the set incrementer method sets these automatically
+        self.set_incrementer()
         # self.review() - Temporarily disabling auto-review (Add as a feature)
 
     def review(self):
@@ -53,8 +56,20 @@ class line(Resources):
         Command(self.command, self.size, self.source, self.dest)
         s = self.get_source()
         d = self.get_dest()
+        self.adjust_incrementer()
         if DEBUG and print("SOURCE: {} , DEST: {}".format(s, d)): pass
 
+    def set_incrementer(self):
+        if isinstance(self.source, EffectiveAddress):
+            self.s_inc = self.source._inc
+        if isinstance(self.dest, EffectiveAddress):
+            self.d_inc = self.dest._inc
+
+    def adjust_incrementer(self):
+        if isinstance(self.source, EffectiveAddress):
+            self.source._inc = self.s_inc
+        if isinstance(self.dest, EffectiveAddress):
+            self.dest._inc = self.d_inc
 
 class AssemblyFileReader():
     '''
@@ -161,9 +176,8 @@ class AssemblyFileReader():
             \)
             """, re.VERBOSE)
             i = int(c.match(v).group('register'))
-            v = A[i].get()
-            A[i].set(v - z, 4)
-            return memory.get_EA(A[i].get())
+            v = A[i]
+            return memory.get_EA(v, False)
 
         elif s.endswith('+'):
             v = s[:-1]
@@ -173,9 +187,8 @@ class AssemblyFileReader():
             \)
             """, re.VERBOSE)
             i = int(c.match(v).group('register'))
-            v = A[i].get() # get value from address register
-            A[i].set(v + z, 4)
-            return memory.get_EA(v) # get effective address
+            v = A[i] # get address register
+            return memory.get_EA(v, True) # get effective address
 
         elif s.startswith('(') and s.endswith(')'):
             v = s[1:-1]
@@ -191,8 +204,10 @@ class AssemblyFileReader():
                 offset = int(c.match(s).group('offset'))
                 i = int(c.match(s).group('address'))
                 scale = int(c.match(s).group('scale'))
-                # factor = int(c.match(s).group('factor'))
-                return memory.get_EA(offset+A[i].get()+scale)#*factor)
+                factor = int(c.match(s).group('factor'))
+                if factor == None:
+                    factor = 1
+                return memory.get_EA( A[i], None, offset, scale*factor)
             elif l == 2:
                 c = re.compile(r"""
                 \(
@@ -202,7 +217,7 @@ class AssemblyFileReader():
                 """, re.VERBOSE)
                 offset = int(c.match(s).group('offset'))
                 i = int(c.match(s).group('address'))
-                return memory.get_EA(offset+A[i].get())
+                return memory.get_EA( A[i], None, offset )
             elif l == 1:
                 c = re.compile(r"""
                 \(
@@ -210,7 +225,7 @@ class AssemblyFileReader():
                 \)
                 """, re.VERBOSE)
                 i = int(c.match(s).group('address'))
-                return memory.get_EA(A[i].get())
+                return memory.get_EA(A[i])
 
         else:
             if s.startswith('#'):
@@ -230,20 +245,20 @@ class AssemblyFileReader():
             elif s.startswith('%d'):
                 return D[int(s[2:])]
             elif s.startswith('0x'):
-                v = int(v, 16)
+                v = int(s[2:], 16)
                 return memory.get_EA(v)
             elif s.startswith('0b'):
-                v = int(v, 2)
+                v = int(s[2:], 2)
                 return memory.get_EA(v)
             elif s.startswith('0o'):
-                v = int(v, 8)
+                v = int(s[2:], 8)
                 return memory.get_EA(v)
         try:
             return int(s)
         except:
             return s
 
-assembler = AssemblyFileReader('test.s')
+assembler = AssemblyFileReader('test1.s')
 assembler.read_into_list()
 pc._line = assembler._line_p
 pc._label_dict = assembler._label_dict

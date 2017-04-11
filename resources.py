@@ -29,7 +29,7 @@ class Resources():
         if o != None:
             self.dest = o
         if isinstance(self.dest, EffectiveAddress):
-            return self.dest.get()
+            return self.dest.get(self.size)
         elif isinstance(self.dest, DataRegister):
             return self.dest.get()
         elif isinstance(self.dest, AddressRegister):
@@ -45,7 +45,7 @@ class Resources():
                 the command.
         '''
         if isinstance(self.dest, EffectiveAddress):
-            self.dest.set(val)
+            self.dest.set(val, size)
         elif isinstance(self.dest, DataRegister):
             self.dest.set(val, size)
         elif isinstance(self.dest, AddressRegister):
