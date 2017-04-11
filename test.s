@@ -1,9 +1,18 @@
 Start: 	clr.l %d0
 	clr.l %d1
-	movea.l #0x1000, %a0
+	movea.l #0x1001, %a0
 	move.l #5, %d2
 	move.l #2, %d2
 	add.l #2, %d2
+	addi.l #2, %d2
+	adda.l #2, %a0
+	clr.l %d2
+	sub.l #3, %d2
+	sub.l #20, %d2
+	move.l #4, (%a0)
+	move.l #5, 0x1000
+	move.l #20, 0x1000
+	move.l #5, 0x1000
 Loop:	move.w (%a0),%d3
 	bpl Positive
 

@@ -1,6 +1,10 @@
 '''
 This contains all the commands related to assembly language.
 See Coldfire Manual for full details on how commands work.
+
+NOTE: Does (-) mean we should just ignore it???
+- Negative numbers are either above 268 435 456 or actually negative.
+- Add an immediate value type
 '''
 from resources import Resources
 from registers import *
@@ -63,7 +67,7 @@ class Command(Resources):
 		  # Arithmetic Commands
 		  'add':		lambda: self.add(),
 		  'adda':		lambda: self.adda(),
-		  # 'addi':		lambda: self.addi(),  -- Extra
+		  'addi':		lambda: self.addi(),
 		  # 'addq':		lambda: self.addi(),  -- Extra
 		  # 'addx':		lambda: self.addi(),  -- Extra
 
@@ -127,8 +131,30 @@ class Command(Resources):
 		# CCR: - * * 0 0
 		ccr.set(N = ccr.check_N(new_d), Z = ccr.check_Z(new_d), V = 0, C = 0)
 
+	# NOTE: If the code is wrong it breaks before this check even happens.
 	def movea(self):
-		pass
+		# Moves an address given at source into an address register.
+		if isinstance(self.dest, AddressRegister):
+			s = self.get_source()
+			d = self.get_dest()
+			z = self.size
+			if z == 1:
+				print("Error: Invalid Size")
+			elif z == 2:
+				s &= 0xffff
+				if s > 65535:  # Negative there we must sign extend
+					d = 0xffff0000
+				else:		   # Otherwise we set 0
+					d = 0x00000000
+			elif z == 4:
+				d &= 0x00000000
+				s &= 0xffffffff
+			self.set_dest(s+d, 4)  # Addresses are always longwords
+			new_d = self.get_dest()
+			# CCR: - - - - -
+			ccr.set(X= 0, N = 0, Z = 0, V = 0, C = 0)
+		else:
+			print("Error: Invalid Destination")
 
 	def bra(self):
 		# GUARD:
@@ -269,79 +295,366 @@ class Command(Resources):
 
 	def add(self):
 		# Adds any source and destination together.
-		# BUG: Does not account for overflow etc.
 		s = self.get_source()
 		d = self.get_dest()
+
+		old_s = self.get_source()
+		old_d = self.get_dest()
+
 		z = self.size
 		if z == 1:
-			s &= 0xff
+			print("Error: Invalid size")
 		elif z == 2:
-			s &= 0xffff
+			print("Error: Invalid Size")
 		elif z == 4:
 			s &= 0xffffffff
-		self.set_dest(s+d, z)
 
+		result = (s+d) & 0xffffffff  # Truncate
+		# print("SUPER DUPER RESULT", result)
+		self.set_dest((result), z)
+		new_d = self.get_dest()
+
+		# CCR: * * * * *
+		ccr.set(X = None,
+				N = ccr.check_N(new_d),
+				Z = ccr.check_Z(new_d),
+				V = ccr.check_V(old_s, old_d, new_d),
+				C = ccr.check_C(old_d + old_s))
+
+
+	# Breaks properly.
 	def adda(self):
-		pass
+		if isinstance(self.dest, AddressRegister):
+			s = self.get_source()
+			d = self.get_dest()
+			z = self.size
+			if z == 1:
+				print("Error: Invalid size")
+			elif z == 2:
+				print("Error: Invalid Size")
+			elif z == 4:
+				s &= 0xffffffff
+			self.set_dest(s+d, z)
+
+			# CCR: - - - - -
+			ccr.set(X = 0, N = 0, Z = 0, V = 0, C = 0)
+		else:
+			print("Error: Invalid Destination")
 
 	def addi(self):
 		# Adds any source and destination together.
-		# BUG: Does not account for overflow etc.
-		# TODO: Errors?
-		s = self.get_source()
-		d = self.get_dest()
-		z = self.size
-		if z == 1:
-			s &= 0xff
-		elif z == 2:
-			s &= 0xffff
-		elif z == 4:
-			s &= 0xffffffff
-		self.set_dest(s+d, z)
+		print("Processing")
+		if isinstance(self.dest, DataRegister):
+			s = self.get_source()
+			d = self.get_dest()
+			z = self.size
+
+			old_s = self.get_source()
+			old_d = self.get_dest()
+
+			if z == 1:
+				print("Error: Invalid size")
+			elif z == 2:
+				print("Error: Invalid size")
+			elif z == 4:
+				s &= 0xffffffff
+
+			result = (s+d) & 0xffffffff  # Truncate
+			self.set_dest((result), z)
+			new_d = self.get_dest()
+
+			# CCR: * * * * *
+			ccr.set(X = None,
+					N = ccr.check_N(new_d),
+					Z = ccr.check_Z(new_d),
+					V = ccr.check_V(old_s, old_d, new_d),
+					C = ccr.check_C(old_d + old_s))
+
+		else:
+			print("Error: Invalid Destination")
+
 
 	def sub(self):
 		# Subtracts any source and destination together.
-		# BUG: Does not account for overflow etc.
+		s = self.get_source()
+		d = self.get_dest()
+
+		old_s = self.get_source()
+		old_d = self.get_dest()
+
+		z = self.size
+		if z == 1:
+			print("Error: Invalid size")
+		elif z == 2:
+			print("Error: Invalid Size")
+		elif z == 4:
+			s &= 0xffffffff
+
+		result = (d-s) & 0xffffffff  # Truncate
+		# print("SUPER DUPER RESULT", result)
+		self.set_dest((result), z)
+		new_d = self.get_dest()
+
+		# CCR: * * * * *
+		ccr.set(X = None,
+				N = ccr.check_N(new_d),
+				Z = ccr.check_Z(new_d),
+				V = ccr.check_V(old_s, old_d, new_d),
+				C = ccr.check_C(old_d + old_s))
+
+	def suba(self):
+		# Subtracts any source and destination address register together.
+		if isinstance(self.dest, AddressRegister):
+
+			s = self.get_source()
+			d = self.get_dest()
+
+			old_s = self.get_source()
+			old_d = self.get_dest()
+
+			z = self.size
+			if z == 1:
+				print("Error: Invalid size")
+			elif z == 2:
+				print("Error: Invalid Size")
+			elif z == 4:
+				s &= 0xffffffff
+
+			result = (d-s) & 0xffffffff  # Truncate
+			# print("SUPER DUPER RESULT", result)
+			self.set_dest((result), z)
+			new_d = self.get_dest()
+
+			# CCR: - - - - -
+			ccr.set(X = 0,
+					N = 0,
+					Z = 0,
+					V = 0,
+					C = 0)
+
+		else:
+			print("Error: Invalid Destination")
+
+	def clr(self):
+		if isinstance(self.source, DataRegister):
+			s = self.get_source()
+			z = self.size
+			if z == 1:
+				s &= 0xffffff00
+			elif z == 2:
+				s &= 0xffff0000
+			elif z == 4:
+				s &= 0x00000000
+
+			self.set_source(s, z)
+
+			# CCR: - 0 1 0 0
+			ccr.set(X = 0, N = 0, Z = 1, V = 0, C = 0)
+		else:
+			print("Error: Invalid Source")
+
+	def divu(self):
+		# Performs signed integer division on the destination by the source
 		s = self.get_source()
 		d = self.get_dest()
 		z = self.size
+
+		old_s = self.get_source()
+		old_d = self.get_dest()
+
+		rem = d % s  #Process remainder
+		rem = rem << 16
+		rem &= 0xffff0000  # Truncate
+
+		quot = d // s
+
 		if z == 1:
-			s &= 0xff
+			print("Error: Invalid Size")
 		elif z == 2:
-			s &= 0xffff
+			quot &= 0x0000ffff
+			d = (rem | quot)
 		elif z == 4:
-			s &= 0xffffffff
-		self.set_dest(s-d, z)
+			d = quot
 
-	def suba(self):
+		self.set_dest(d, z)
+		new_d = self.get_dest()
+
+		# CCR: - * * * 0
+		ccr.set(X = None,
+				N = ccr.check_N(new_d),
+				Z = ccr.check_Z(new_d),
+				V = ccr.check_V(old_s, old_d, new_d),
+				C = 0)
+
+	def divs(self):
 		pass
 
-	def subi(self):
-		pass
+	def mulu(self):
+		s = self.get_source()
+		d = self.get_dest()
 
-	def clr(self):
+		result = 0
+		if z == 1:
+			print("Error: Invalid Size")
+		elif z == 2:
+			result = s * d
+		elif z == 4:
+			result = s * d
+			result &= 0xffffffff
+
+		self.set_dest(result, z)
+		new_d = self.get_dest()
+		# CCR: - * * 0 0
+		ccr.set(X = None,
+				N = ccr.check_N(new_d),
+				Z = ccr.check_Z(new_d),
+				V = 0,
+				C = 0)
+
+	def muls(self):
 		pass
 
 	def neg(self):
 		pass
 
 	def asl(self):
-		pass
+
+		if isinstance(self.dest, DataRegister):
+			s = self.get_source()
+			d = self.get_dest()
+			z = self.size
+
+			if s >= 0 and s <= 8:
+				d = d << s
+				C_bit = d >> 32
+				C_bit = C_bit & 0x01  # Take a look at what the last bit was
+				d &= 0xffffffff  # Truncate
+			else:
+				print("Error: Invalid shift")
+
+			self.set_dest(d, z)
+			new_d = self.get_dest()
+
+			# CCR: * * * 0 *
+			ccr.set(X = None,
+					N = ccr.check_N(new_d),
+					Z = ccr.check_Z(new_d),
+					V = 0,
+					C = C_bit)
+
+		else:
+			print("Error: Invalid Destination")
 
 	def asr(self):
-		pass
+
+		if isinstance(self.dest, DataRegister):
+			s = self.get_source()
+			d = self.get_dest()
+			z = self.size
+
+			if s >= 0 and s <= 8:
+				d = d >> s  # NOTE: Not sure if python accounts for sign ext.
+				C_bit = d >> s - 1
+				C_bit = C_bit & 0x01  # Take a look at what the last bit was
+				d &= 0xffffffff  # Truncate
+			else:
+				print("Error: Invalid shift")
+
+			self.set_dest(d, z)
+			new_d = self.get_dest()
+
+			# CCR: * * * 0 *
+			ccr.set(X = None,
+					N = ccr.check_N(new_d),
+					Z = ccr.check_Z(new_d),
+					V = 0,
+					C = C_bit)
+
+		else:
+			print("Error: Invalid Destination")
 
 	def _and(self):
-		pass
+
+		z = self.size
+		if z == 1 or z == 2:
+			print("Error: Invalid Size")
+		elif z == 4:
+			s = self.get_source()
+			d = self.get_dest()
+
+			d = s & d
+			self.set_dest(d, 4)
+			new_d = self.get_dest()
+
+			# CCR: * * * 0 0
+			ccr.set(X = None,
+					N = ccr.check_N(new_d),
+					Z = ccr.check_Z(new_d),
+					V = 0,
+					C = 0)
+
 
 	def _or(self):
-		pass
+
+		z = self.size
+		if z == 1 or z == 2:
+			print("Error: Invalid Size")
+		elif z == 4:
+			s = self.get_source()
+			d = self.get_dest()
+
+			d = s | d
+			self.set_dest(d, 4)
+			new_d = self.get_dest()
+
+			# CCR: * * * 0 0
+			ccr.set(X = None,
+					N = ccr.check_N(new_d),
+					Z = ccr.check_Z(new_d),
+					V = 0,
+					C = 0)
 
 	def _eor(self):
-		pass
+
+		if isinstance(self.source, DataRegister):
+			z = self.size
+			if z == 1 or z == 2:
+				print("Error: Invalid Size")
+			elif z == 4:
+				s = self.get_source()
+				d = self.get_dest()
+
+				d = d ^ s
+				self.set_dest(d, 4)
+				new_d = self.get_dest()
+
+				# CCR: * * * 0 0
+				ccr.set(X = None,
+						N = ccr.check_N(new_d),
+						Z = ccr.check_Z(new_d),
+						V = 0,
+						C = 0)
+		else:
+			print("Error: Invalid Source")
 
 	def _not(self):
-		pass
+
+		z = self.size
+		if z == 1 or z == 2:
+			print("Error: Invalid Size")
+		elif z == 4:
+			s = self.get_source()
+
+			s = ~s
+			self.set_source(s, 4)
+			new_s = self.get_source()
+
+			# CCR: * * * 0 0
+			ccr.set(X = None,
+					N = ccr.check_N(new_s),
+					Z = ccr.check_Z(new_s),
+					V = 0,
+					C = 0)
 
 	def cmp(self):
 		pass

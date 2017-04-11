@@ -5,6 +5,9 @@
         * Display different types
         * Display a range of values
         * Add more "monitors"
+
+    BUG: Code still seems to run all the way through at least once for some
+    reason.
 """
 
 from tkinter import *
@@ -22,6 +25,10 @@ class simulator_gui:
         master.title("ColdFire Simulator")
         # master.resizeable(width=False, height=False)
         master.geometry('{}x{}'.format(1400, 889))  # width x height
+
+        self.address_view = "dec"  # Initialize view base
+        self.data_view = "dec"
+        self.screen_resolution = 1080
 
         # Text box for code
         self.Code_View_lbl = Text(master, width=100, height=60)
@@ -55,8 +62,8 @@ class simulator_gui:
         self.extension2_lbl = Label(master, text="Extension 2:", font=("FreeSans", 15))
         self.extension2_lbl.grid(row=4, column=1)
 
-        self.extension2_lbl = Label(master, text="123456789012345", font=("FreeSans", 15))
-        self.extension2_lbl.grid(row=4, column=2)
+        self.extension2_value_lbl = Label(master, text="123456789012345", font=("FreeSans", 15))
+        self.extension2_value_lbl.grid(row=4, column=2)
 
         # Address Register Labels - rows 5-9, cols 1-2,
         # hardcoded constants: spacer = 7th row + offset, columns = 1 or 2
@@ -66,21 +73,21 @@ class simulator_gui:
         self.addressReg_lbl.grid(row=5, column=1, columnspan=2)
 
         self.addressRegisters = []
-        for _ in range(7):
+        for _ in range(8):
             self.addressRegisters.append(Label(master, text="0x12345678901234567890123456789012",
-                                               font=("FreeSans", 12), padx=10, relief=SUNKEN))
+                                               font=("FreeSans", 12), padx=10))
 
         counter = 0
         for label in self.addressRegisters:
-            if counter < 3:
+            if counter < 4:
                 spacer = 6+counter
                 label.grid(row=spacer, column=1)
             else:
-                spacer = 3+counter
+                spacer = 2+counter
                 label.grid(row=spacer, column=2)
             counter += 1
 
-        self.addressRegisters[6].grid(row=9, column=1)
+        # self.addressRegisters[6].grid(row=9, column=1)
 
         # self.addressRegisters[0].config(text="test1")
         # self.addressRegisters[6].config(text="test2")
@@ -92,21 +99,21 @@ class simulator_gui:
         self.dataReg_lbl.grid(row=10, column=1, columnspan=2)
 
         self.dataRegisters = []
-        for _ in range(7):
+        for _ in range(8):
             self.dataRegisters.append(Label(master, text="0x12345678",
                                             font=("FreeSans", 12)))
 
         counter = 0
         for label in self.dataRegisters:
-            if counter < 3:
+            if counter < 4:
                 spacer = 11+counter
                 label.grid(row=spacer, column=1)
             else:
-                spacer = 8+counter
+                spacer = 7+counter
                 label.grid(row=spacer, column=2)
             counter += 1
 
-        self.dataRegisters[6].grid(row=14, column=1)
+        # self.dataRegisters[6].grid(row=14, column=1)
 
         # Memory Scroll box
         self.memory_display_lbl = Label(master, text="Memory: ",
@@ -123,8 +130,7 @@ class simulator_gui:
         for item in ["one", "two", "three", "four"]:
             self.memory_display2_list.insert(END, item)
 
-        # TODO: Implement change memory view button
-        self.add_memory_btn = Button(master, text="Add")
+        self.add_memory_btn = Button(master, text="Add", command=self.add_monitor)
         self.add_memory_btn.grid(row=17, column=1)
 
         self.remove_memory_btn = Button(master, text="Remove")
@@ -143,26 +149,128 @@ class simulator_gui:
         # TODO: Add additional functionality to "Load file"
         self.menubar = Menu(master)
         self.menubar.add_command(label="Load file", command=self.loadfile)
-        self.menubar.add_command(label="Quit", command=master.quit)
+        self.menubar.add_command(label="Screen Resolution", command=self.change_res)
+        self.menubar.add_command(label="Quit", command=self.master.quit)
         self.master.config(menu=self.menubar)
 
         self.dataRegister_menu = Menu(self.menubar, tearoff=0)
-        self.dataRegister_menu.add_command(label="View in Bin")
-        self.dataRegister_menu.add_command(label="View in Hex")
-        self.dataRegister_menu.add_command(label="View in Dec")
+        self.dataRegister_menu.add_command(label="View in Bin",
+        command=lambda view="bin": self.set_dataRegister_view(view))
+
+        self.dataRegister_menu.add_command(label="View in Hex",
+        command=lambda view="hex": self.set_dataRegister_view(view))
+
+        self.dataRegister_menu.add_command(label="View in Dec",
+        command=lambda view="dec": self.set_dataRegister_view(view))
+
         self.menubar.add_cascade(label="Data Register",
                                  menu=self.dataRegister_menu)
 
         self.addressRegister_menu = Menu(self.menubar, tearoff=0)
-        self.addressRegister_menu.add_command(label="View in Bin")
-        self.addressRegister_menu.add_command(label="View in Hex")
-        self.addressRegister_menu.add_command(label="View in Dec")
+        self.addressRegister_menu.add_command(label="View in Bin",
+        command=lambda view="bin": self.set_addressRegister_view(view))
+
+        self.addressRegister_menu.add_command(label="View in Hex",
+        command=lambda view="hex": self.set_addressRegister_view(view))
+
+        self.addressRegister_menu.add_command(label="View in Dec",
+        command=lambda view="dec": self.set_addressRegister_view(view))
+
         self.menubar.add_cascade(label="Address Register",
-                                 menu=self.dataRegister_menu)
+                                 menu=self.addressRegister_menu)
+
+        # self.change_res()  # Comment out for not auto-changing.
 
     def windowsize(self):  # DEBUG Purposes
         print("height", self.master.winfo_height())
         print("width", self.master.winfo_width())
+
+    def change_res(self):
+        self.master.geometry('{}x{}'.format(1139, 648))  # width x height
+        self.screen_resolution = 720
+
+        self.Code_View_lbl.config(width=80, height=40)
+        self.CCR_lbl.config(font=("FreeSans", 10))
+        self.CCR_value_lbl.config(font=("FreeSans", 10))
+        self.OP_lbl.config(font=("FreeSans", 10))
+        self.OP_value_lbl.config(font=("FreeSans", 10))
+        # self.extension1_lbl.config(self.master font=("FreeSans", 10))
+        self.extension1_value_lbl.config(font=("FreeSans", 10))
+        self.extension2_lbl.config(font=("FreeSans", 10))
+        self.extension2_lbl.config(font=("FreeSans", 10))
+        self.addressReg_lbl.config(font=("FreeSans", 10))
+
+        for register in self.addressRegisters:
+            register.config(font=("FreeSans", 10), padx=10)
+
+        for register in self.dataRegisters:
+            register.config(font=("FreeSans", 10), padx=10)
+
+        self.memory_display_lbl.config(font=("FreeSans", 10))
+
+    def add_monitor(self):
+
+        def get_input():
+            # print(user_input.get())
+            address = user_input.get()
+            print(address)
+
+            # if not self.CPU.add_memory_monitor(address):  # TODO: Give error
+            #     print("Error: Invalid memory address")
+            #
+            self.CPU.add_memory_monitor(address)
+            self.update_mem()
+            prompt_monitor.destroy()
+
+        prompt_monitor = Toplevel()
+        prompt_monitor.geometry('{}x{}'.format(299, 155))
+        prompt_monitor.title("Monitor Selection")
+
+        msg = Message(prompt_monitor, text="Enter a valid mem address: ")
+        msg.pack()
+
+        user_input = Entry(prompt_monitor)
+        user_input.pack()
+
+        button = Button(prompt_monitor, text="Accept", command=get_input)
+        button.pack()
+
+        self.update_mem()
+
+    def update_mem(self):
+        self.memory_display_list.delete(0, END)
+        self.memory_display2_list.delete(0, END)
+        for address in self.CPU.memory_monitor:
+            self.memory_display_list.insert(END, self.CPU.memory_monitor[address])
+
+    def set_dataRegister_view(self, view):
+
+        self.data_view = view
+
+        for i in range(8):
+            # print(self.CPU.current_dataR_values[i])
+            if view == "bin":
+                self.dataRegisters[i].config(text=bin(self.CPU.current_dataR_values[i]))
+            elif view == "hex":
+                self.dataRegisters[i].config(text=hex(self.CPU.current_dataR_values[i]))
+            else:
+                self.dataRegisters[i].config(text=(self.CPU.current_dataR_values[i]))
+
+    def set_addressRegister_view(self, view):
+
+        self.address_view = view
+
+        for i in range(8):
+            # print(self.CPU.current_addressR_values[i])
+            if view == "bin":
+                self.addressRegisters[i].config(
+                                text=bin(self.CPU.current_addressR_values[i]))
+            elif view == "hex":
+                self.addressRegisters[i].config(
+                                text=hex(self.CPU.current_addressR_values[i]))
+            else:
+                self.addressRegisters[i].config(
+                                text=(self.CPU.current_addressR_values[i]))
 
     def reset_line(self):
         self.current_line_number = 1
@@ -172,6 +280,7 @@ class simulator_gui:
     def next_line(self):  # TODO: Constrain next line to max num of lines
         self.CPU.execute_line(self.current_line_number)
         changes = self.CPU.check_for_change()
+        self.update_mem()
 
         if changes:  # If there are changes, display and highlight them
             self.display_register_changes(changes)
@@ -204,6 +313,16 @@ class simulator_gui:
     def display_register_changes(self, changes):
         for change in changes:
             if change[0] == "D":
-                self.dataRegisters[int(change[1])].config(text=changes[change])
+                if self.data_view == "bin":
+                    self.dataRegisters[int(change[1])].config(text=bin(changes[change]))
+                elif self.data_view == "hex":
+                    self.dataRegisters[int(change[1])].config(text=hex(changes[change]))
+                else:
+                    self.dataRegisters[int(change[1])].config(text=changes[change])
             elif change[0] == "A":
-                self.addressRegisters[int(change[1])].config(text=changes[change])
+                if self.address_view == "bin":
+                    self.addressRegisters[int(change[1])].config(text=bin(changes[change]))
+                elif self.address_view == "hex":
+                    self.addressRegisters[int(change[1])].config(text=hex(changes[change]))
+                else:
+                    self.addressRegisters[int(change[1])].config(text=changes[change])
