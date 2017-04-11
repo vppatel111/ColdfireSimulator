@@ -1,4 +1,4 @@
-from memory import Memory
+import memory
 # from registers import DataRegister, AddressRegister, CCR
 # from registers import DataRegister, AddressRegister, CCR, ProgramCounter
 import registers
@@ -13,8 +13,6 @@ class CPU():
     it runs code sorted in memory specified.
     """
     def __init__(self):
-        self.memory = Memory()  # Initialize memory
-
         # Read in and store code.
         self.assembler = AssemblyFileReader('test.s')
         self.assembler.read_into_list()
@@ -24,12 +22,20 @@ class CPU():
 
         self.current_dataR_values = dict()
         self.current_addressR_values = dict()
+        self.memory_monitor = dict()
 
-        for i in range(8):
+        # print("before")
+        # memory.memory.set(1000, 21)
+        # print("CPU", memory.memory.get(1000, 4))
+
+        for i in range(7):
             self.current_dataR_values[i] = 0
             self.current_addressR_values[i] = 0
 
-        print(self.current_dataR_values, self.current_addressR_values)
+    # NOTE: Creates a mem location, even if it is never used.
+    def add_memory_monitor(self, address):
+        self.memory_monitor[address] = memory.memory.get(int(address), 4)
+        print(memory.memory.get(int(address), 1))
 
     def execute_line(self, line_num):
         """
@@ -48,12 +54,16 @@ class CPU():
         ('Register Type, #': New Value)
         """
         changes = dict()
-        for i in range(8):
+        for i in range(7):
             if self.current_dataR_values[i] != registers.D[i].get():
                 changes['D' + str(i)] = registers.D[i].get()
                 self.current_dataR_values[i] = registers.D[i].get()
             if self.current_addressR_values[i] != registers.A[i].get():
                 changes['A' + str(i)] = registers.A[i].get()
                 self.current_addressR_values[i] = registers.A[i].get()
+
+        for address in self.memory_monitor:
+            self.memory_monitor[address] = memory.memory.get(int(address), 4)
+            print("mem_mon", self.memory_monitor[address], memory.memory.get(1000, 4))
 
         return changes
