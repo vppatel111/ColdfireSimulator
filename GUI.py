@@ -178,6 +178,8 @@ class simulator_gui:
         self.menubar.add_cascade(label="Address Register",
                                  menu=self.addressRegister_menu)
 
+        self.change_res()  # Comment out for not auto-changing.
+
     def windowsize(self):  # DEBUG Purposes
         print("height", self.master.winfo_height())
         print("width", self.master.winfo_width())
