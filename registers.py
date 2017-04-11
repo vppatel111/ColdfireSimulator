@@ -160,7 +160,7 @@ class ProgramCounter():
         '''
         Executes the given line n, the increments to the next line.
         '''
-        while self.n in self._line:
+        if self.n in self._line:
             self._line[self.n].review()
             self.n += 1
 
@@ -191,9 +191,9 @@ for i in range(8):
 
 ccr = CCR()
 pc = ProgramCounter()
-# source/dest type dictionary
-sd_type_dict = {
-        r'%a': lambda i: A.get(i), # address register
-        r'%d': lambda i: D.get(i), # data register
-        r'#' : lambda i: int(i), # immediate
-        }
+# # source/dest type dictionary
+# sd_type_dict = {
+#         r'%a': lambda i: A.get(i), # address register
+#         r'%d': lambda i: D.get(i), # data register
+#         r'#' : lambda i: int(i), # immediate
+#         }

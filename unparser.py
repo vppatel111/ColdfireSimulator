@@ -86,7 +86,6 @@ class AssemblyFileReader():
         self._line_a = []           # file parsed (assembly)
         self._line_p = dict()       # file parsed (python)
         self._label_dict = dict()   # to organize label to a line number
-
     #IDEA: potentially use a dictionary if we have multiple files?
 
     def read_into_list(self, file_name = None):
