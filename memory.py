@@ -1,3 +1,4 @@
+from registers import AddressRegister
 class EffectiveAddress():
     '''
     An instance of an effective address in memory which is called by the Memory
@@ -13,14 +14,32 @@ class EffectiveAddress():
     #TODO: Add a guard for the val and address so they do not exceed a byte and longword
            respectively.
     '''
-    def __init__(self, a, v = 0):
+    def __init__(self, a, v = 0, is_increment = None, offset = None, sf = None):
         self.val = v
         self._address = a
-    def get(self, z):
-        return memory.get(self._address, z)
+        self._inc = is_increment
+        self._offset = offset
+        self._sf = sf
 
-    def set(self, v):
-        memory.set(self._address, v)
+    def get(self, z):
+        address = self.get_address(z)
+        return memory.get(address, z)
+
+    def set(self, v, z):
+        address = self.get_address(z)
+        memory.set(address, v, z)
+
+    def get_address(self, z):
+        if isinstance(self._address, AddressRegister):
+            address = self._address.get()
+            if self._inc == False: # decrement address register
+                self._address.set(address-z, 4)
+                address = self._address.get()
+            elif self._inc == True:
+                self._address.set(address+z, 4)
+        else:
+            address = self._address
+        return address
 
 class Memory():
     '''
@@ -35,26 +54,24 @@ class Memory():
     def __init__(self):
         self._mem = dict()
 
-    def get_EA(self, address):
+    def get_EA(self, address, inc = None, offset = None, sf = None):
         if address not in self._mem:
-            self._mem[address] = EffectiveAddress(address)
+            self._mem[address] = EffectiveAddress(address, is_increment = inc, offset = offset, sf = sf)
         return self._mem[address]
 
     def get(self, address, size=1):
         v = 0
         for z in range(size):
             if (address+size-z-1) not in self._mem:
-                self._mem[address+size-z-1] = EffectiveAddress(address)
+                self._mem[address+size-z-1] = EffectiveAddress(address+size-z-1)
             v += self._mem.get(address+size-z-1).val << z*8
         return v
 
-    def set(self, address, val):
-        b = 0xFF
+    def set(self, address, val, size):
+        b = 0xFF  # one byte
         v = val
-        offset = 0
-        while v > 0:
-            self._mem[address+offset] = EffectiveAddress(v & b)
-            v >>= 8
-            offset += 1
+        for z in range(size):
+            self._mem[address+size-z-1] = EffectiveAddress(address+size-z-1, v & b)
+            v >>= 8 # shift by one byte
 
 memory = Memory()
