@@ -7,7 +7,6 @@ class DataRegister():
         self._val = 0
 
     def get(self):
-        # return self.cat_val(self._val)
         return self._val
 
     def set(self, val, size):
@@ -191,9 +190,3 @@ for i in range(8):
 
 ccr = CCR()
 pc = ProgramCounter()
-# # source/dest type dictionary
-# sd_type_dict = {
-#         r'%a': lambda i: A.get(i), # address register
-#         r'%d': lambda i: D.get(i), # data register
-#         r'#' : lambda i: int(i), # immediate
-#         }

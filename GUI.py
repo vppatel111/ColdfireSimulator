@@ -277,7 +277,7 @@ class simulator_gui:
 
     def reset_line(self):
         self.current_line_number = 1
-        self.pc.n = 0
+        self.CPU.pc.n = 0
         self.Code_View_lbl.tag_remove("current_line", 1.0, "end")
         self.Code_View_lbl.tag_add("current_line", 1.0, 2.0)
 
@@ -287,7 +287,7 @@ class simulator_gui:
         self.update_mem()
 
         # if changes:  # If there are changes, display and highlight them
-        # self.display_register_changes(changes)
+        self.display_register()
 
         self.current_line_number = self.CPU.pc.n + 1
 
@@ -315,8 +315,8 @@ class simulator_gui:
         self.Code_View_lbl.tag_add("current_line", 1.0, 2.0)
 
     def display_register(self):
-        set_dataRegister_view()
-        set_addressRegister_view()
+        self.set_dataRegister_view()
+        self.set_addressRegister_view()
         # for change in changes:
         #     if change[0] == "D":
         #         if self.data_view == "bin":
