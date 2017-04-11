@@ -182,12 +182,15 @@ class ProgramCounter():
         '''
         self.n = self._label_dict[label] - 1 # since exec line will add 1
 
+
 D = dict()
 A = dict()
 
 for i in range(8):
     D[i] = DataRegister()
     A[i] = AddressRegister()
+
+A[7].set(0xFFFFF, 4)  # iInitialize stack pointer
 
 ccr = CCR()
 pc = ProgramCounter()

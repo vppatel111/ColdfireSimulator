@@ -7,6 +7,8 @@ Start: 	clr.l %d0
 	addi.l #2, %d2
 	adda.l #2, %a0
 	clr.l %d2
+	pea 0x1000
+	lea 0x1000, %a1
 	sub.l #3, %d2
 	sub.l #20, %d2
 	move.l #4, (%a0)

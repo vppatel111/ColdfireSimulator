@@ -8,6 +8,7 @@ NOTE: Does (-) mean we should just ignore it???
 '''
 from resources import Resources
 from registers import *
+import memory
 DEBUG = True
 # dictionary of sizes
 size_dict = {
@@ -657,10 +658,51 @@ class Command(Resources):
 					C = 0)
 
 	def cmp(self):
-		pass
+
+		if isinstance(self.dest, DataRegister):
+			s = self.get_source()
+			d = self.get_dest()
+			z = self.size
+			if z == 1:
+				s &= 0x000000ff
+				d &= 0x000000ff
+			elif z == 2:
+				s &= 0x0000ffff
+				d &= 0x0000ffff
+			elif z == 4:
+				s &= 0xffffffff
+				d &= 0xffffffff
+
+			result = d-s
+			# CCR: * * * * *
+			ccr.set(X = None,
+					N = ccr.check_N(result),
+					Z = ccr.check_Z(result),
+					V = ccr.check_V(result),
+					C = ccr.check_C(result, True))
 
 	def cmpa(self):
 		pass
 
 	def cmpi(self):
 		pass
+
+	def lea(self):
+		s = self.get_source_address()
+		self.set_dest(s, 4)
+
+		# CCR: - - - - -
+
+	def pea(self):
+		s = self.get_source_address()
+
+		next_add = A[7].get() + 4
+		memory.memory.set(A[7].get(), next_add, 4)
+		print(memory.memory.get(A[7].get(), 4))
+
+		# current_stack = registers.A[7].get()
+		# current_stack -= 4
+		# register.A[7].set(current_stack, 4)
+		# self.set_source(current_stack, 4)
+
+		# CCR: - - - - -

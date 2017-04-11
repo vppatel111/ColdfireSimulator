@@ -6,8 +6,8 @@
         * Display a range of values
         * Add more "monitors"
 
-    BUG: Code still seems to run all the way through at least once for some
-    reason.
+    BUG: - Remember to initialize stack pointer.
+
 """
 
 from tkinter import *

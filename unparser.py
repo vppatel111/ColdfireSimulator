@@ -54,10 +54,17 @@ class line(Resources):
         # execute command:
         if DEBUG and print(self.label, self.command, self.size, self.source, self.dest): pass
         Command(self.command, self.size, self.source, self.dest)
-        s = self.get_source()
-        d = self.get_dest()
+
+        s = 0
+        d = 0
+
+        # if self.source is not None:
+        #     s = self.get_source()
+        # if self.dest is not None:
+        #     d = self.get_dest()
+
         self.adjust_incrementer()
-        if DEBUG and print("SOURCE: {} , DEST: {}".format(s, d)): pass
+        # if DEBUG and print("SOURCE: {} , DEST: {}".format(s, d)): pass
 
     def set_incrementer(self):
         if isinstance(self.source, EffectiveAddress):
