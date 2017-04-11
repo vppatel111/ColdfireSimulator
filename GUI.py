@@ -5,6 +5,9 @@
         * Display different types
         * Display a range of values
         * Add more "monitors"
+
+    BUG: Code still seems to run all the way through at least once for some
+    reason.
 """
 
 from tkinter import *
@@ -127,9 +130,7 @@ class simulator_gui:
         for item in ["one", "two", "three", "four"]:
             self.memory_display2_list.insert(END, item)
 
-        # TODO: Implement change memory view button
-        # self.add_memory_btn = Button(master, text="Add", command=self.add_monitor)
-        self.add_memory_btn = Button(master, text="Add")
+        self.add_memory_btn = Button(master, text="Add", command=self.add_monitor)
         self.add_memory_btn.grid(row=17, column=1)
 
         self.remove_memory_btn = Button(master, text="Remove")
@@ -178,7 +179,7 @@ class simulator_gui:
         self.menubar.add_cascade(label="Address Register",
                                  menu=self.addressRegister_menu)
 
-        self.change_res()  # Comment out for not auto-changing.
+        # self.change_res()  # Comment out for not auto-changing.
 
     def windowsize(self):  # DEBUG Purposes
         print("height", self.master.winfo_height())
@@ -207,45 +208,46 @@ class simulator_gui:
 
         self.memory_display_lbl.config(font=("FreeSans", 10))
 
-    # def add_monitor(self):
-    #
-    #     def get_input():
-    #         # print(user_input.get())
-    #         address = user_input.get()
-    #         print(address)
-    #
-    #         # if not self.CPU.add_memory_monitor(address):  # TODO: Give error
-    #         #     print("Error: Invalid memory address")
-    #         #
-    #         self.CPU.add_memory_monitor(address)
-    #         prompt_monitor.destroy()
-    #
-    #     prompt_monitor = Toplevel()
-    #     prompt_monitor.geometry('{}x{}'.format(299, 155))
-    #     prompt_monitor.title("Monitor Selection")
-    #
-    #     msg = Message(prompt_monitor, text="Enter a valid mem address: ")
-    #     msg.pack()
-    #
-    #     user_input = Entry(prompt_monitor)
-    #     user_input.pack()
-    #
-    #     button = Button(prompt_monitor, text="Accept", command=get_input)
-    #     button.pack()
-    #
-    #     self.update_mem()
+    def add_monitor(self):
 
-    # def update_mem(self):
-    #     self.memory_display_list.delete(0, END)
-    #     self.memory_display2_list.delete(0, END)
-    #     for address in self.CPU.memory_monitor:
-    #         self.memory_display_list.insert(END, self.CPU.memory_monitor[address])
+        def get_input():
+            # print(user_input.get())
+            address = user_input.get()
+            print(address)
+
+            # if not self.CPU.add_memory_monitor(address):  # TODO: Give error
+            #     print("Error: Invalid memory address")
+            #
+            self.CPU.add_memory_monitor(address)
+            self.update_mem()
+            prompt_monitor.destroy()
+
+        prompt_monitor = Toplevel()
+        prompt_monitor.geometry('{}x{}'.format(299, 155))
+        prompt_monitor.title("Monitor Selection")
+
+        msg = Message(prompt_monitor, text="Enter a valid mem address: ")
+        msg.pack()
+
+        user_input = Entry(prompt_monitor)
+        user_input.pack()
+
+        button = Button(prompt_monitor, text="Accept", command=get_input)
+        button.pack()
+
+        self.update_mem()
+
+    def update_mem(self):
+        self.memory_display_list.delete(0, END)
+        self.memory_display2_list.delete(0, END)
+        for address in self.CPU.memory_monitor:
+            self.memory_display_list.insert(END, self.CPU.memory_monitor[address])
 
     def set_dataRegister_view(self, view):
 
         self.data_view = view
 
-        for i in range(7):
+        for i in range(8):
             # print(self.CPU.current_dataR_values[i])
             if view == "bin":
                 self.dataRegisters[i].config(text=bin(self.CPU.current_dataR_values[i]))
@@ -258,7 +260,7 @@ class simulator_gui:
 
         self.address_view = view
 
-        for i in range(7):
+        for i in range(8):
             # print(self.CPU.current_addressR_values[i])
             if view == "bin":
                 self.addressRegisters[i].config(

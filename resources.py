@@ -51,6 +51,20 @@ class Resources():
         elif isinstance(self.dest, AddressRegister):
             self.dest.set(val, size)
 
+    def set_source(self, val, size):
+        '''
+        Returns:        None
+        Side effects:   Changes the value of the number stored in the source.
+        NOTE:   This method is mainly used to set the new source after applying
+                the command.
+        '''
+        if isinstance(self.source, EffectiveAddress):
+            self.source.set(val, size)
+        elif isinstance(self.source, DataRegister):
+            self.source.set(val, size)
+        elif isinstance(self.source, AddressRegister):
+            self.source.set(val, size)
+
     def sign_extend(val):
         '''
         Sign extends val then returns new val. The extension only works for

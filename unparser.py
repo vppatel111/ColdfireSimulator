@@ -258,8 +258,8 @@ class AssemblyFileReader():
         except:
             return s
 
-assembler = AssemblyFileReader('test1.s')
-assembler.read_into_list()
-pc._line = assembler._line_p
-pc._label_dict = assembler._label_dict
-pc.exec_line()
+# assembler = AssemblyFileReader('test.s')
+# assembler.read_into_list()
+# pc._line = assembler._line_p
+# pc._label_dict = assembler._label_dict
+# pc.exec_line()

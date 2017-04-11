@@ -24,18 +24,19 @@ class CPU():
         self.current_addressR_values = dict()
         self.memory_monitor = dict()
 
-        # print("before")
-        # memory.memory.set(1000, 21)
-        # print("CPU", memory.memory.get(1000, 4))
+        print("before")
+        memory.memory.set(1000, 21, 4)
+        print("CPU", memory.memory.get(1000, 4))
 
-        for i in range(7):
+        for i in range(8):
             self.current_dataR_values[i] = 0
             self.current_addressR_values[i] = 0
 
     # NOTE: Creates a mem location, even if it is never used.
     def add_memory_monitor(self, address):
+        print("add", address)
         self.memory_monitor[address] = memory.memory.get(int(address), 4)
-        print(memory.memory.get(int(address), 1))
+        print(memory.memory.get(int(address), 1), memory.memory.get(int(address), 1))
 
     def execute_line(self, line_num):
         """
@@ -54,7 +55,7 @@ class CPU():
         ('Register Type, #': New Value)
         """
         changes = dict()
-        for i in range(7):
+        for i in range(8):
             if self.current_dataR_values[i] != registers.D[i].get():
                 changes['D' + str(i)] = registers.D[i].get()
                 self.current_dataR_values[i] = registers.D[i].get()
