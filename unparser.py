@@ -38,6 +38,9 @@ class line(Resources):
         self.source = s
         self.dest = d
         self.command = c
+        self.s_inc = None # if the source is an EA, is being incremented/decremented in this line?
+        self.d_inc = None # the set incrementer method sets these automatically
+        self.set_incrementer()
         # self.review() - Temporarily disabling auto-review (Add as a feature)
 
     def review(self):
@@ -53,8 +56,20 @@ class line(Resources):
         Command(self.command, self.size, self.source, self.dest)
         s = self.get_source()
         d = self.get_dest()
+        self.adjust_incrementer()
         if DEBUG and print("SOURCE: {} , DEST: {}".format(s, d)): pass
 
+    def set_incrementer(self):
+        if isinstance(self.source, EffectiveAddress):
+            self.s_inc = self.source._inc
+        if isinstance(self.dest, EffectiveAddress):
+            self.d_inc = self.dest._inc
+
+    def adjust_incrementer(self):
+        if isinstance(self.source, EffectiveAddress):
+            self.source._inc = self.s_inc
+        if isinstance(self.dest, EffectiveAddress):
+            self.dest._inc = self.d_inc
 
 class AssemblyFileReader():
     '''
@@ -243,7 +258,7 @@ class AssemblyFileReader():
         except:
             return s
 
-assembler = AssemblyFileReader('test.s')
+assembler = AssemblyFileReader('test1.s')
 assembler.read_into_list()
 pc._line = assembler._line_p
 pc._label_dict = assembler._label_dict

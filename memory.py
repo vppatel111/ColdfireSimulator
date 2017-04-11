@@ -37,6 +37,7 @@ class EffectiveAddress():
                 address = self._address.get()
             elif self._inc == True:
                 self._address.set(address+z, 4)
+            self._inc = None
         else:
             address = self._address
         return address
