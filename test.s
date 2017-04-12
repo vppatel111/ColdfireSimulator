@@ -1,26 +1,22 @@
+move.w #0x15, 0x1000
+move.w #0x32, 0x1002
+move.w #0x1, 0x1004
+move.w #0xAA, 0x1006
+move.w #0xFF, 0x1008
+
 Start: 	clr.l %d0
 	clr.l %d1
-	movea.l #0x1001, %a0
+	movea.l #0x1000, %a0
 	move.l #5, %d2
-	move.l #2, %d2
-	add.l #2, %d2
-	addi.l #2, %d2
-	adda.l #2, %a0
-	clr.l %d2
-	sub.l #3, %d2
-	sub.l #20, %d2
-	move.l #4, (%a0)
-	move.l #5, 0x1000
-	move.l #20, 0x1000
-	move.l #5, 0x1000
+
 Loop:	move.w (%a0),%d3
 	bpl Positive
 
 Negative: add.l #1, %d1
 	bra Check
 
-Positive:
-	add.l #1, %d0
+Positive: add.l #1, %d0
+
 Check:	adda.l #2, %a0
 	sub.l #1, %d2
 	bne Loop

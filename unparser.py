@@ -258,7 +258,7 @@ class AssemblyFileReader():
             return s
 
 def debugging():
-    assembler = AssemblyFileReader('assign3.s')
+    assembler = AssemblyFileReader('test.s')
     assembler.read_into_list()
     pc._line = assembler._line_p
     pc._label_dict = assembler._label_dict
@@ -267,6 +267,9 @@ def debugging():
             pc.exec_line()
             for address in memory._mem:
                 if type(address) == int:
-                    print(hex(address).upper(), hex(memory.get(address, 1)).upper())
+                    print('address:', hex(address).upper(),
+                    'value:', hex(memory.get(address, 1)).upper(),
+                    'ccr:', bin(ccr._val)
+                    )
 
 # debugging()
