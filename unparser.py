@@ -6,7 +6,6 @@ from resources import Resources
 
 DEBUG = True
 
-
 class line(Resources):
     '''
     The line object contains and handles all the processing of the assembly line
@@ -54,10 +53,6 @@ class line(Resources):
         # execute command:
         if DEBUG and print(self.label, self.command, self.size, self.source, self.dest): pass
         Command(self.command, self.size, self.source, self.dest)
-
-        s = 0
-        d = 0
-
         # if self.source is not None:
         #     s = self.get_source()
         # if self.dest is not None:
@@ -265,8 +260,19 @@ class AssemblyFileReader():
         except:
             return s
 
-# assembler = AssemblyFileReader('test.s')
-# assembler.read_into_list()
-# pc._line = assembler._line_p
-# pc._label_dict = assembler._label_dict
-# pc.exec_line()
+def debugging():
+    assembler = AssemblyFileReader('test.s')
+    assembler.read_into_list()
+    pc._line = assembler._line_p
+    pc._label_dict = assembler._label_dict
+    while(True):
+        if input():
+            pc.exec_line()
+            for address in memory._mem:
+                if type(address) == int:
+                    print('address:', hex(address).upper(),
+                    'value:', hex(memory.get(address, 1)).upper(),
+                    'ccr:', bin(ccr._val)
+                    )
+
+# debugging()

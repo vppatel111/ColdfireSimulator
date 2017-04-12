@@ -33,9 +33,9 @@ class CPU():
         #     self.current_dataR_values[i] = 0
         #     self.current_addressR_values[i] = 0
 
-    def execute_line(self, line_num):
-        """
-        Note: Line_num is not zero indexed and the dictionary is.
-        """
-        # global D
-        self.assembler._line_p[line_num - 1].review()
+    # NOTE: Creates a mem location, even if it is never used.
+    def add_memory_monitor(self, address):
+        print("add", address)
+        address = self.string_to_num(address)
+        self.memory_monitor[address] = self.memory.get(address, 4)
+        print(memory.get(address, 1), self.memory.get(address, 1))

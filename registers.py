@@ -7,7 +7,6 @@ class DataRegister():
         self._val = 0
 
     def get(self):
-        # return self.cat_val(self._val)
         return self._val
 
     def set(self, val, size):
@@ -61,15 +60,15 @@ class CCR():
         return (self._val >> 0)&1
 
     def set(self, X = None, N = None, Z = None, V = None, C = None):
-        if X is not None:
+        if X != None:
             self.assign_X(X)
-        if N is not None:
+        if N != None:
             self.assign_N(N)
-        if Z is not None:
+        if Z != None:
             self.assign_Z(Z)
-        if V is not None:
+        if V != None:
             self.assign_V(V)
-        if C is not None:
+        if C != None:
             self.assign_C(C)
 
     def check_C(self, v, X = None):
@@ -82,9 +81,8 @@ class CCR():
             X = C
         self.set(X = X, C = C)
 
-    def check_N(self, v):
-        if v < 0:   N = True
-        else:       N = False
+    def check_N(self, v, z = 4):
+        N = (v >> z*8-1) & 1
         self.set(N = N)
 
     def check_Z(self, v):
@@ -96,7 +94,7 @@ class CCR():
         Sm = (s>>35)&1
         Dm = (d>>35)&1
         Rm = (r>>35)&1
-        if (Sm == 1 & Dm == 1 & Rm == 0) or (Sm == 0 & Dm == 0 & Rm == 1):
+        if (Sm == 1 and Dm == 1 and Rm == 0) or (Sm == 0 and Dm == 0 and Rm == 1):
             V = True
         else:
             V = False
@@ -180,7 +178,7 @@ class ProgramCounter():
         '''
         Changes n to the line number of the label.
         '''
-        self.n = self._label_dict[label] - 1 # since exec line will add 1
+        self.n = self._label_dict[label] - 1# since exec line will add 1
 
 
 D = dict()
@@ -194,9 +192,3 @@ A[7].set(0xFFFFF, 4)  # iInitialize stack pointer
 
 ccr = CCR()
 pc = ProgramCounter()
-# # source/dest type dictionary
-# sd_type_dict = {
-#         r'%a': lambda i: A.get(i), # address register
-#         r'%d': lambda i: D.get(i), # data register
-#         r'#' : lambda i: int(i), # immediate
-#         }
