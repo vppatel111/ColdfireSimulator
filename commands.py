@@ -140,20 +140,25 @@ class Command(Resources):
 			d = self.get_dest()
 			z = self.size
 			if z == 1:
+				valid = False
 				print("Error: Invalid Size")
 			elif z == 2:
 				s &= 0xffff
-				if s > 65535:  # Negative there we must sign extend
+				if s > 65535:  # Negative therefore we must sign extend
 					d = 0xffff0000
 				else:		   # Otherwise we set 0
 					d = 0x00000000
+				valid = True
 			elif z == 4:
 				d &= 0x00000000
 				s &= 0xffffffff
-			self.set_dest(s+d, 4)  # Addresses are always longwords
-			new_d = self.get_dest()
-			# CCR: - - - - -
-			ccr.set(X= 0, N = 0, Z = 0, V = 0, C = 0)
+				valid = True
+
+			if valid:  # If all checks passed, execute operation
+				self.set_dest(s+d, 4)  # Addresses are always longwords
+				new_d = self.get_dest()
+				# CCR: - - - - -
+				ccr.set(X= 0, N = 0, Z = 0, V = 0, C = 0)
 		else:
 			print("Error: Invalid Destination")
 
@@ -299,7 +304,7 @@ class Command(Resources):
 		s = self.get_source()
 		d = self.get_dest()
 
-		old_s = self.get_source()
+		old_s = self.get_source()  # Used for ccr calculations
 		old_d = self.get_dest()
 
 		z = self.size
@@ -308,59 +313,9 @@ class Command(Resources):
 		elif z == 2:
 			print("Error: Invalid Size")
 		elif z == 4:
-			s &= 0xffffffff
-
-		result = (s+d) & 0xffffffff  # Truncate
-		# print("SUPER DUPER RESULT", result)
-		self.set_dest((result), z)
-		new_d = self.get_dest()
-
-		# CCR: * * * * *
-		ccr.set(X = None,
-				N = ccr.check_N(new_d),
-				Z = ccr.check_Z(new_d),
-				V = ccr.check_V(old_s, old_d, new_d),
-				C = ccr.check_C(old_d + old_s))
-
-
-	# Breaks properly.
-	def adda(self):
-		if isinstance(self.dest, AddressRegister):
-			s = self.get_source()
-			d = self.get_dest()
-			z = self.size
-			if z == 1:
-				print("Error: Invalid size")
-			elif z == 2:
-				print("Error: Invalid Size")
-			elif z == 4:
-				s &= 0xffffffff
-			self.set_dest(s+d, z)
-
-			# CCR: - - - - -
-			ccr.set(X = 0, N = 0, Z = 0, V = 0, C = 0)
-		else:
-			print("Error: Invalid Destination")
-
-	def addi(self):
-		# Adds any source and destination together.
-		print("Processing")
-		if isinstance(self.dest, DataRegister):
-			s = self.get_source()
-			d = self.get_dest()
-			z = self.size
-
-			old_s = self.get_source()
-			old_d = self.get_dest()
-
-			if z == 1:
-				print("Error: Invalid size")
-			elif z == 2:
-				print("Error: Invalid size")
-			elif z == 4:
-				s &= 0xffffffff
-
-			result = (s+d) & 0xffffffff  # Truncate
+			s &= 0xffffffff  # This may be unnecessary
+			result = (s+d) & 0xffffffff  # Calculate and truncate
+			# print("SUPER DUPER RESULT", result)
 			self.set_dest((result), z)
 			new_d = self.get_dest()
 
@@ -371,6 +326,55 @@ class Command(Resources):
 					V = ccr.check_V(old_s, old_d, new_d),
 					C = ccr.check_C(old_d + old_s))
 
+
+	# Breaks properly.
+	def adda(self):
+		# Adds any source to an address register.
+		if isinstance(self.dest, AddressRegister):
+			s = self.get_source()
+			d = self.get_dest()
+			z = self.size
+			if z == 1:
+				print("Error: Invalid size")
+			elif z == 2:
+				print("Error: Invalid Size")
+			elif z == 4:
+				s &= 0xffffffff  # This may be unnecessary
+				self.set_dest(s+d, z)
+
+				# CCR: - - - - -
+				ccr.set(X = 0, N = 0, Z = 0, V = 0, C = 0)
+		else:
+			print("Error: Invalid Destination")
+
+	def addi(self):
+		# Adds any source and destination together.
+		if isinstance(self.dest, DataRegister):
+			s = self.get_source()
+			d = self.get_dest()
+			z = self.size
+
+			old_s = self.get_source()  # Used for ccr calc.
+			old_d = self.get_dest()
+
+			if z == 1:
+				print("Error: Invalid size")
+			elif z == 2:
+				print("Error: Invalid size")
+			elif z == 4:
+				s &= 0xffffffff
+
+				result = (s+d) & 0xffffffff  # Calculate and truncate
+				self.set_dest((result), z)
+				new_d = self.get_dest()
+
+				# CCR: * * * * *
+				ccr.set(X = None,
+						N = ccr.check_N(new_d),
+						Z = ccr.check_Z(new_d),
+						V = ccr.check_V(old_s, old_d, new_d),
+						C = ccr.check_C(old_d + old_s))
+
 		else:
 			print("Error: Invalid Destination")
 
@@ -380,7 +384,7 @@ class Command(Resources):
 		s = self.get_source()
 		d = self.get_dest()
 
-		old_s = self.get_source()
+		old_s = self.get_source()  # Used in ccr calculations
 		old_d = self.get_dest()
 
 		z = self.size
@@ -391,17 +395,17 @@ class Command(Resources):
 		elif z == 4:
 			s &= 0xffffffff
 
-		result = (d-s) & 0xffffffff  # Truncate
-		# print("SUPER DUPER RESULT", result)
-		self.set_dest((result), z)
-		new_d = self.get_dest()
+			result = (d-s) & 0xffffffff  # Truncate
+			# print("SUPER DUPER RESULT", result)
+			self.set_dest((result), z)
+			new_d = self.get_dest()
 
-		# CCR: * * * * *
-		ccr.set(X = None,
-				N = ccr.check_N(new_d),
-				Z = ccr.check_Z(new_d),
-				V = ccr.check_V(old_s, old_d, new_d),
-				C = ccr.check_C(old_d + old_s))
+			# CCR: * * * * *
+			ccr.set(X = None,
+					N = ccr.check_N(new_d),
+					Z = ccr.check_Z(new_d),
+					V = ccr.check_V(old_s, old_d, new_d),
+					C = ccr.check_C(old_d + old_s))
 
 	def suba(self):
 		# Subtracts any source and destination address register together.
@@ -421,17 +425,17 @@ class Command(Resources):
 			elif z == 4:
 				s &= 0xffffffff
 
-			result = (d-s) & 0xffffffff  # Truncate
-			# print("SUPER DUPER RESULT", result)
-			self.set_dest((result), z)
-			new_d = self.get_dest()
+				result = (d-s) & 0xffffffff  # Truncate
+				# print("SUPER DUPER RESULT", result)
+				self.set_dest((result), z)
+				new_d = self.get_dest()
 
-			# CCR: - - - - -
-			ccr.set(X = 0,
-					N = 0,
-					Z = 0,
-					V = 0,
-					C = 0)
+				# CCR: - - - - -
+				ccr.set(X = None,
+						N = None,
+						Z = None,
+						V = None,
+						C = None)
 
 		else:
 			print("Error: Invalid Destination")
@@ -447,7 +451,7 @@ class Command(Resources):
 			elif z == 4:
 				s &= 0x00000000
 
-			self.set_source(s, z)
+			self.set_source(s, z)  # Set source depending on bits cleared.
 
 			# CCR: - 0 1 0 0
 			ccr.set(X = 0, N = 0, Z = 1, V = 0, C = 0)
@@ -455,37 +459,41 @@ class Command(Resources):
 			print("Error: Invalid Source")
 
 	def divu(self):
-		# Performs signed integer division on the destination by the source
+		# Performs unsigned integer division on the destination by the source
 		s = self.get_source()
 		d = self.get_dest()
 		z = self.size
 
-		old_s = self.get_source()
+		old_s = self.get_source()  # Used in ccr calc
 		old_d = self.get_dest()
 
-		rem = d % s  #Process remainder
+		rem = d % s  # Process remainder
 		rem = rem << 16
 		rem &= 0xffff0000  # Truncate
 
-		quot = d // s
+		quot = d // s  # Process divisor
 
 		if z == 1:
+			valid = False
 			print("Error: Invalid Size")
-		elif z == 2:
-			quot &= 0x0000ffff
+		elif z == 2:  # For words we combine the remaider and quotience
+			quot &= 0x0000ffff  # Truncate
 			d = (rem | quot)
+			valid = True
 		elif z == 4:
-			d = quot
+			d = quot & 0xffffffff  # Truncate
+			valid = True
 
-		self.set_dest(d, z)
-		new_d = self.get_dest()
+		if valid:
+			self.set_dest(d, z)
+			new_d = self.get_dest()
 
-		# CCR: - * * * 0
-		ccr.set(X = None,
-				N = ccr.check_N(new_d),
-				Z = ccr.check_Z(new_d),
-				V = ccr.check_V(old_s, old_d, new_d),
-				C = 0)
+			# CCR: - * * * 0
+			ccr.set(X = None,
+					N = ccr.check_N(new_d),
+					Z = ccr.check_Z(new_d),
+					V = ccr.check_V(old_s, old_d, new_d),
+					C = 0)
 
 	def divs(self):
 		pass
@@ -497,20 +505,24 @@ class Command(Resources):
 		result = 0
 		if z == 1:
 			print("Error: Invalid Size")
-		elif z == 2:
+			valid = False
+		elif z == 2:  # Both are effectively the same however.
 			result = s * d
+			valid = True
 		elif z == 4:
 			result = s * d
-			result &= 0xffffffff
+			result &= 0xffffffff  # Truncate into a longword
+			valid = True
 
-		self.set_dest(result, z)
-		new_d = self.get_dest()
-		# CCR: - * * 0 0
-		ccr.set(X = None,
-				N = ccr.check_N(new_d),
-				Z = ccr.check_Z(new_d),
-				V = 0,
-				C = 0)
+		if valid:
+			self.set_dest(result, z)
+			new_d = self.get_dest()
+			# CCR: - * * 0 0
+			ccr.set(X = None,
+					N = ccr.check_N(new_d),
+					Z = ccr.check_Z(new_d),
+					V = 0,
+					C = 0)
 
 	def muls(self):
 		pass
@@ -520,57 +532,58 @@ class Command(Resources):
 
 	def asl(self):
 
+		# Shifts a value left by 0-8 bits.
 		if isinstance(self.dest, DataRegister):
 			s = self.get_source()
 			d = self.get_dest()
 			z = self.size
 
-			if s >= 0 and s <= 8:
+			if s >= 0 and s <= 8:  # Bit shift must be 0-8 bits
 				d = d << s
 				C_bit = d >> 32
 				C_bit = C_bit & 0x01  # Take a look at what the last bit was
 				d &= 0xffffffff  # Truncate
+
+				self.set_dest(d, z)
+				new_d = self.get_dest()  # For ccr calc.
+
+				# CCR: * * * 0 *
+				ccr.set(X = None,
+						N = ccr.check_N(new_d),
+						Z = ccr.check_Z(new_d),
+						V = 0,
+						C = C_bit)
 			else:
 				print("Error: Invalid shift")
-
-			self.set_dest(d, z)
-			new_d = self.get_dest()
-
-			# CCR: * * * 0 *
-			ccr.set(X = None,
-					N = ccr.check_N(new_d),
-					Z = ccr.check_Z(new_d),
-					V = 0,
-					C = C_bit)
-
 		else:
 			print("Error: Invalid Destination")
 
 	def asr(self):
 
+		# Shifts a value rigt by 0-8 bits
 		if isinstance(self.dest, DataRegister):
 			s = self.get_source()
 			d = self.get_dest()
 			z = self.size
 
-			if s >= 0 and s <= 8:
+			if s >= 0 and s <= 8:  # Bit shift must b 0-8 bits.
 				d = d >> s  # NOTE: Not sure if python accounts for sign ext.
 				C_bit = d >> s - 1
 				C_bit = C_bit & 0x01  # Take a look at what the last bit was
 				d &= 0xffffffff  # Truncate
+
+				self.set_dest(d, z)
+				new_d = self.get_dest()
+
+				# CCR: * * * 0 *
+				ccr.set(X = None,
+						N = ccr.check_N(new_d),
+						Z = ccr.check_Z(new_d),
+						V = 0,
+						C = C_bit)
+
 			else:
 				print("Error: Invalid shift")
-
-			self.set_dest(d, z)
-			new_d = self.get_dest()
-
-			# CCR: * * * 0 *
-			ccr.set(X = None,
-					N = ccr.check_N(new_d),
-					Z = ccr.check_Z(new_d),
-					V = 0,
-					C = C_bit)
-
 		else:
 			print("Error: Invalid Destination")
 
@@ -583,9 +596,9 @@ class Command(Resources):
 			s = self.get_source()
 			d = self.get_dest()
 
-			d = s & d
+			d = s & d  # Take advantage of python
 			self.set_dest(d, 4)
-			new_d = self.get_dest()
+			new_d = self.get_dest()  # For ccr calculations
 
 			# CCR: * * * 0 0
 			ccr.set(X = None,
@@ -593,7 +606,6 @@ class Command(Resources):
 					Z = ccr.check_Z(new_d),
 					V = 0,
 					C = 0)
-
 
 	def _or(self):
 
@@ -604,9 +616,9 @@ class Command(Resources):
 			s = self.get_source()
 			d = self.get_dest()
 
-			d = s | d
+			d = s | d  # Take advantage of python
 			self.set_dest(d, 4)
-			new_d = self.get_dest()
+			new_d = self.get_dest()  # For ccr calc
 
 			# CCR: * * * 0 0
 			ccr.set(X = None,
@@ -625,9 +637,9 @@ class Command(Resources):
 				s = self.get_source()
 				d = self.get_dest()
 
-				d = d ^ s
+				d = d ^ s  # Continued python abuse
 				self.set_dest(d, 4)
-				new_d = self.get_dest()
+				new_d = self.get_dest()  # Ccr calc
 
 				# CCR: * * * 0 0
 				ccr.set(X = None,
@@ -646,7 +658,7 @@ class Command(Resources):
 		elif z == 4:
 			s = self.get_source()
 
-			s = ~s
+			s = ~s  # Python abuse
 			self.set_source(s, 4)
 			new_s = self.get_source()
 
@@ -675,7 +687,7 @@ class Command(Resources):
 
 			result = d-s
 			# CCR: * * * * *
-			ccr.set(X = None,
+			ccr.set(X = None,  # Hope ccr functions work
 					N = ccr.check_N(result),
 					Z = ccr.check_Z(result),
 					V = ccr.check_V(result),
@@ -693,16 +705,10 @@ class Command(Resources):
 
 		# CCR: - - - - -
 
-	def pea(self):
+	def pea(self):  # NOTE: A7 or SP is initialized in registers.
 		s = self.get_source_address()
 
 		next_add = A[7].get() + 4
 		memory.memory.set(A[7].get(), next_add, 4)
-		print(memory.memory.get(A[7].get(), 4))
-
-		# current_stack = registers.A[7].get()
-		# current_stack -= 4
-		# register.A[7].set(current_stack, 4)
-		# self.set_source(current_stack, 4)
 
 		# CCR: - - - - -
