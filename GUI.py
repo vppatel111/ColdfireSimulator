@@ -227,7 +227,7 @@ class simulator_gui:
                                     command=lambda t="dark": self.set_theme(t))
         self.menubar.add_cascade(label="Set Theme", menu=self.theme_menu)
 
-        self.menubar.add_command(label="Quit", command=self.windowsize)
+        self.menubar.add_command(label="Quit", command=self.master.quit)
 
         # self.change_res()  # Comment out for not auto-changing.
 
@@ -238,6 +238,8 @@ class simulator_gui:
     def set_theme(self, theme):
         if theme == "dark":
             self.master.config(background="#202020")
+        elif theme == "light":
+            self.master.config(background="#E0E0E0")
 
     def change_res(self, res):
 
