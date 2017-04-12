@@ -771,8 +771,9 @@ class Command(Resources):
 
 	def pea(self):  # NOTE: A7 or SP is initialized in registers.
 		s = self.get_source_address()
-
-		next_add = A[7].get() + 4
-		memory.memory.set(A[7].get(), next_add, 4)
+		a = memory.memory.get_EA(A[7])
+		a.set(s, 4)
+		next_add = A[7].get() - 4
+		A[7].set(next_add, 4)
 
 		# CCR: - - - - -
