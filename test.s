@@ -1,6 +1,8 @@
 Start: 	clr.l %d0
 	clr.l %d1
-	movea.l #0x1001, %a0
+	movea.l #0x2000, %a0
+	move.l #100, (%a0)
+	move.l (%a0), %d7
 	move.l #5, %d2
 	move.l #2, %d2
 	add.l #2, %d2

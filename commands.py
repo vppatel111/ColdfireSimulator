@@ -157,7 +157,7 @@ class Command(Resources):
 				self.set_dest(s+d, 4)  # Addresses are always longwords
 				new_d = self.get_dest()
 				# CCR: - - - - -
-				ccr.set(X= 0, N = 0, Z = 0, V = 0, C = 0)
+				ccr.set(X=None, N=None, Z=None, V=None, C=None)
 		else:
 			print("Error: Invalid Destination")
 
@@ -453,7 +453,7 @@ class Command(Resources):
 			self.set_source(s, z)  # Set source depending on bits cleared.
 
 			# CCR: - 0 1 0 0
-			ccr.set(X = 0, N = 0, Z = 1, V = 0, C = 0)
+			ccr.set(X = None, N = 0, Z = 1, V = 0, C = 0)
 		else:
 			print("Error: Invalid Source")
 
