@@ -38,10 +38,22 @@ class CPU():
         #     self.current_addressR_values[i] = 0
 
     # NOTE: Creates a mem location, even if it is never used.
+    def string_to_num(self, lovelyString):
+        if lovelyString.startswith('0x'):
+            lovelyNum = int(lovelyString, 16)
+        elif lovelyString.startswith('0b'):
+            lovelyNum = int(lovelyString, 2)
+        elif lovelyString.startswith('0o'):
+            lovelyNum = int(lovelyString, 8)
+        else:
+            lovelyNum = int(lovelyString)
+        return lovelyNum
+
     def add_memory_monitor(self, address):
         print("add", address)
-        self.memory_monitor[address] = self.memory.get(int(address), 4)
-        print(memory.get(int(address), 1), self.memory.get(int(address), 1))
+        address = self.string_to_num(address)
+        self.memory_monitor[address] = self.memory.get(address, 4)
+        print(memory.get(address, 1), self.memory.get(address, 1))
 
     def execute_line(self, line_num):
         """

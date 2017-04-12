@@ -249,7 +249,7 @@ class simulator_gui:
             view = self.data_view
 
         for i in range(8):
-            print(self.CPU.D[i].get())
+            # print(self.CPU.D[i].get())
             if view == "bin":
                 self.dataRegisters[i].config(text=bin(self.CPU.D[i].get()))
             elif view == "hex":
@@ -264,7 +264,7 @@ class simulator_gui:
             view = self.address_view
 
         for i in range(8):
-            print(self.CPU.A[i].get())
+            # print(self.CPU.A[i].get())
             if view == "bin":
                 self.addressRegisters[i].config(
                                 text=bin(self.CPU.A[i].get()))
@@ -303,7 +303,7 @@ class simulator_gui:
         SimulatorMain.py and displays the text in the Text widget, additionally
         it calls an unparser to process the file.
         """
-        self.CPU = CPU('test.s')
+        self.CPU = CPU('assign3'+'.s')
         # assembler.read_into_list()
         file_data = ''
         for e in self.CPU.assembler._file:  # Create a large formatted string to be disp
