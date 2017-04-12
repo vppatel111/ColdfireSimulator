@@ -303,27 +303,23 @@ class Command(Resources):
 		s = self.get_source()
 		d = self.get_dest()
 
-		old_s = self.get_source()  # Used for ccr calculations
-		old_d = self.get_dest()
-
 		z = self.size
 		if z == 1:
 			print("Error: Invalid size")
 		elif z == 2:
 			print("Error: Invalid Size")
 		elif z == 4:
-			s &= 0xffffffff  # This may be unnecessary
-			result = (s+d) & 0xffffffff  # Calculate and truncate
+			result = s+d  # Calculate and truncate
 			# print("SUPER DUPER RESULT", result)
-			self.set_dest((result), z)
+			self.set_dest(result, z)
 			new_d = self.get_dest()
-
+			print(s, d, result)
 			# CCR: * * * * *
 			ccr.set(
 					N = ccr.check_N(new_d),
 					Z = ccr.check_Z(new_d),
-					V = ccr.check_V(old_s, old_d, new_d),
-					C = ccr.check_C(old_d + old_s, X = True))
+					V = ccr.check_V(s, d, new_d),
+					C = ccr.check_C(result, X = True))
 
 
 	# Breaks properly.
@@ -353,26 +349,21 @@ class Command(Resources):
 			d = self.get_dest()
 			z = self.size
 
-			old_s = self.get_source()  # Used for ccr calc.
-			old_d = self.get_dest()
-
 			if z == 1:
 				print("Error: Invalid size")
 			elif z == 2:
 				print("Error: Invalid size")
 			elif z == 4:
-				s &= 0xffffffff
-
-				result = (s+d) & 0xffffffff  # Calculate and truncate
-				self.set_dest((result), z)
+				result = (s+d) # Calculate and truncate
+				self.set_dest(result, z)
 				new_d = self.get_dest()
-
+				print(s, d, result)
 				# CCR: * * * * *
-				ccr.set(X = None,
+				ccr.set(
 						N = ccr.check_N(new_d),
 						Z = ccr.check_Z(new_d),
-						V = ccr.check_V(old_s, old_d, new_d),
-						C = ccr.check_C(old_d + old_s, True))
+						V = ccr.check_V(s, d, new_d),
+						C = ccr.check_C(result, True))
 
 		else:
 			print("Error: Invalid Destination")
@@ -454,7 +445,7 @@ class Command(Resources):
 		if type(self.source) == int and self.source >= 0 and self.source <= 7:
 			self.sub()
 		else:
-			raise Exception("Source is not an immediate value!")
+			raise Exception("Source is not an immediate value")
 
 	def clr(self):
 		if isinstance(self.source, DataRegister):

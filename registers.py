@@ -73,10 +73,7 @@ class CCR():
 
     def check_C(self, v, X = None):
         C = (v >> 8*4)&1
-        if C == 1:
-            C = True
-        else:
-            C = False
+        print(hex(v), C)
         if X != None:
             X = C
         self.set(X = X, C = C)
