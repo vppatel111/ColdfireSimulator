@@ -78,7 +78,7 @@ class simulator_gui:
 
         self.addressRegisters = []
         for _ in range(8):
-            self.addressRegisters.append(Label(master, text="0x12345678901234567890123456789012",
+            self.addressRegisters.append(Label(master, text="0x0",
                                                font=("FreeSans", 12), padx=10))
 
         counter = 0
@@ -444,7 +444,7 @@ class simulator_gui:
         prompt_file.geometry('{}x{}'.format(299, 155))
         prompt_file.title("File Selection")
 
-        msg = Message(prompt_file, text="Enter a valid mem address: ")
+        msg = Message(prompt_file, text="Enter a file: ")
         msg.pack()
 
         user_input = Entry(prompt_file)
@@ -468,7 +468,6 @@ class simulator_gui:
         file_directory = "AssemblyTest/" + self.file_name
         self.CPU = CPU(file_directory+'.s')
         # self.CPU = CPU('test.s')
-
 
         self.Code_View_lbl.delete(1.0, END)  # Clear text
 
