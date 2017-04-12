@@ -403,7 +403,7 @@ class Command(Resources):
 			ccr.set(X = None,
 					N = ccr.check_N(new_d),
 					Z = ccr.check_Z(new_d),
-					V = ccr.check_V(old_s, old_d, new_d),
+					V = ccr.check_V(-1*old_s, old_d, new_d),
 					C = ccr.check_C(old_d + -1*old_s))
 
 	def suba(self):
@@ -669,7 +669,6 @@ class Command(Resources):
 					C = 0)
 
 	def cmp(self):
-
 		if isinstance(self.dest, DataRegister):
 			s = self.get_source()
 			d = self.get_dest()
@@ -693,10 +692,50 @@ class Command(Resources):
 					C = ccr.check_C(result, True))
 
 	def cmpa(self):
-		pass
+		if isinstance(self.dest, AddressRegister):
+			s = self.get_source()
+			d = self.get_dest()
+			z = self.size
+			if z == 1:
+				s &= 0x000000ff
+				d &= 0x000000ff
+			elif z == 2:
+				s &= 0x0000ffff
+				d &= 0x0000ffff
+			elif z == 4:
+				s &= 0xffffffff
+				d &= 0xffffffff
+
+			result = d-s
+			# CCR: * * * * *
+			ccr.set(X = None,  # Hope ccr functions work
+					N = ccr.check_N(result),
+					Z = ccr.check_Z(result),
+					V = ccr.check_V(result),
+					C = ccr.check_C(result, True))
 
 	def cmpi(self):
-		pass
+		if type(self.source) == int:
+			s = self.get_source()
+			d = self.get_dest()
+			z = self.size
+			if z == 1:
+				s &= 0x000000ff
+				d &= 0x000000ff
+			elif z == 2:
+				s &= 0x0000ffff
+				d &= 0x0000ffff
+			elif z == 4:
+				s &= 0xffffffff
+				d &= 0xffffffff
+
+			result = d-s
+			# CCR: * * * * *
+			ccr.set(X = None,  # Hope ccr functions work
+					N = ccr.check_N(result),
+					Z = ccr.check_Z(result),
+					V = ccr.check_V(result),
+					C = ccr.check_C(result, True))
 
 	def lea(self):
 		s = self.get_source_address()

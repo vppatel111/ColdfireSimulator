@@ -94,7 +94,7 @@ class CCR():
         Sm = (s>>35)&1
         Dm = (d>>35)&1
         Rm = (r>>35)&1
-        if (Sm == 1 & Dm == 1 & Rm == 0) or (Sm == 0 & Dm == 0 & Rm == 1):
+        if (Sm == 1 and Dm == 1 and Rm == 0) or (Sm == 0 and Dm == 0 and Rm == 1):
             V = True
         else:
             V = False
