@@ -29,6 +29,8 @@ class simulator_gui:
         self.address_view = "hex"  # Initialize view base
         self.data_view = "hex"
         self.memory_monitor = dict()
+        self.file_name = ""
+        self.resolution = 1080
 
         column_offset = 1  # Used to shift the entire right side
 
@@ -225,7 +227,7 @@ class simulator_gui:
                                     command=lambda t="dark": self.set_theme(t))
         self.menubar.add_cascade(label="Set Theme", menu=self.theme_menu)
 
-        self.menubar.add_command(label="Quit", command=self.master.quit)
+        self.menubar.add_command(label="Quit", command=self.windowsize)
 
         # self.change_res()  # Comment out for not auto-changing.
 
@@ -241,6 +243,7 @@ class simulator_gui:
 
         if res == 768:
             self.master.geometry('{}x{}'.format(1211, 648))  # width x height
+            self.resolution = 768
 
             self.Code_View_lbl.config(width=80, height=40)
             self.CCR_lbl.config(font=("FreeSans", 10))
@@ -264,6 +267,7 @@ class simulator_gui:
 
         elif res == 1080:
             self.master.geometry('{}x{}'.format(1510, 889))  # width x height
+            self.resolution = 1080
 
             self.Code_View_lbl.config(width=100, height=60)
             self.CCR_lbl.config(font=("FreeSans", 15))
@@ -302,16 +306,16 @@ class simulator_gui:
             # print(user_input.get())
             address = user_input.get()
             address_list = [a.strip() for a in address.split(',')]
-            print(address)
+            # print(address)
 
             # if not self.CPU.add_memory_monitor(address):  # TODO: Give error
             #     print("Error: Invalid memory address")
             #
             for address in address_list:
                 address = self.string_to_num(address)
-                print("add", hex(address))
+                # print("add", hex(address))
                 self.memory_monitor[address] = self.CPU.memory.memory.get(address, 1)
-                print(self.CPU.memory.memory.get(address, 1))
+                # print(self.CPU.memory.memory.get(address, 1))
 
             self.update_mem()
             prompt_monitor.destroy()
@@ -333,10 +337,10 @@ class simulator_gui:
 
     def update_mem(self):
         self.memory_display_list.delete(0, END)
-        self.memory_display2_list.delete(0, END)
+        # self.memory_display2_list.delete(0, END)
         for address in sorted(self.memory_monitor.keys()):
             self.memory_display_list.insert(END,
-                                    "{}: {}".format(hex(address), hex(self.CPU.memory.memory.get(address, 1))))
+            "{}: {}".format(hex(address), hex(self.CPU.memory.memory.get(address, 1))))
 
     def update_ccr(self):
         X = self.CPU.ccr.get_X()
@@ -345,6 +349,25 @@ class simulator_gui:
         V = self.CPU.ccr.get_V()
         C = self.CPU.ccr.get_C()
         self.CCR_value_lbl.config(text="{} {} {} {} {}".format(X, N, Z, V, C))
+
+    # def check_window_size(self):
+    #     """For hex/dec, 1080: height 889 & width 1093
+    #        For bin height 889 & width 1510
+    #
+    #        hex: height 648 & width 1211
+    #        bin: height 648 & width 905
+    #
+    #     """
+    #     if self.address_view == "bin" or self.data_view == "bin":
+    #         if self.resolution == 768:
+    #             self.master.geometry('{}x{}'.format(1211, 648))
+    #         elif self.resolution == 1080:
+    #             self.master.geometry('{}x{}'.format(1510, 889))
+    #     else:
+    #         if self.resolution == 768:
+    #             self.master.geometry('{}x{}'.format(905, 648))
+    #         elif self.resolution == 1080:
+    #             self.master.geometry('{}x{}'.format(1093, 889))
 
     def set_dataRegister_view(self, view=None):
         if view is not None:
@@ -362,6 +385,8 @@ class simulator_gui:
                 self.dataRegisters[i].config(text=hex(self.CPU.D[i].get()))
             else:
                 self.dataRegisters[i].config(text=self.CPU.D[i].get())
+
+        # self.check_window_size()
 
     def set_addressRegister_view(self, view=None):
         if view is not None:
@@ -381,6 +406,8 @@ class simulator_gui:
                 self.addressRegisters[i].config(
                                 text=(self.CPU.A[i].get()))
 
+        # self.check_window_size()
+
     def reset_line(self):
         self.CPU.pc.n = 0
         # self.CPU.pc.n = 0
@@ -388,8 +415,6 @@ class simulator_gui:
         self.Code_View_lbl.tag_add("current_line", 1.0, 2.0)
 
     def next_line(self):  # TODO: Constrain next line to max num of lines
-        highlight_start = str(self.CPU.pc.n+1) + ".0"
-        highlight_end = str(self.CPU.pc.n + 2) + ".0"
         self.CPU.pc.exec_line()
         # self.CPU.pc.n = self.CPU.pc.n
         # changes = self.CPU.check_for_change()
@@ -398,9 +423,36 @@ class simulator_gui:
         self.update_ccr()
         # if changes:  # If there are changes, display and highlight them
         self.display_register()
+
+        highlight_start = str(self.CPU.pc.n + 1) + ".0"
+        highlight_end = str(self.CPU.pc.n + 2) + ".0"
         self.Code_View_lbl.tag_remove("current_line", 1.0, "end")
         self.Code_View_lbl.tag_add("current_line", highlight_start,
                                    highlight_end)
+
+    def get_file_dir(self):
+        def get_input():
+
+            self.file_name = user_input.get()
+            print(self.file_name)
+            prompt_file.destroy()
+
+        prompt_file = Toplevel()
+
+        prompt_file.geometry('{}x{}'.format(299, 155))
+        prompt_file.title("File Selection")
+
+        msg = Message(prompt_file, text="Enter a valid mem address: ")
+        msg.pack()
+
+        user_input = Entry(prompt_file)
+        user_input.pack()
+
+        button = Button(prompt_file, text="Enter", command=get_input)
+        button.pack()
+
+        self.master.wait_window(prompt_file)
+
 
     def loadfile(self):
         """
@@ -408,7 +460,11 @@ class simulator_gui:
         SimulatorMain.py and displays the text in the Text widget, additionally
         it calls an unparser to process the file.
         """
-        self.CPU = CPU('midtermFC1'+'.s')
+
+        self.get_file_dir()
+
+        file_directory = "AssemblyTest/" + self.file_name
+        self.CPU = CPU(file_directory+'.s')
         # self.CPU = CPU('test.s')
 
         self.Code_View_lbl.delete(1.0, END)  # Clear text
