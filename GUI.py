@@ -6,8 +6,8 @@
         * Display a range of values
         * Add more "monitors"
 
-    BUG: Code still seems to run all the way through at least once for some
-    reason.
+    BUG: - Remember to initialize stack pointer.
+
 """
 
 from tkinter import *
@@ -28,6 +28,7 @@ class simulator_gui:
         self.address_view = "hex"  # Initialize view base
         self.data_view = "hex"
         self.screen_resolution = 1080
+        self.memory_monitor = dict()
 
         # Text box for code
         self.Code_View_lbl = Text(master, width=100, height=60)
@@ -217,7 +218,11 @@ class simulator_gui:
             # if not self.CPU.add_memory_monitor(address):  # TODO: Give error
             #     print("Error: Invalid memory address")
             #
-            self.CPU.add_memory_monitor(address)
+
+            print("add", address)
+            self.memory_monitor[address] = self.CPU.memory.memory.get(int(address), 4)
+            print(self.CPU.memory.memory.get(int(address), 1))
+
             self.update_mem()
             prompt_monitor.destroy()
 
@@ -239,11 +244,20 @@ class simulator_gui:
     def update_mem(self):
         self.memory_display_list.delete(0, END)
         self.memory_display2_list.delete(0, END)
-        for address in self.CPU.memory_monitor:
-            self.memory_display_list.insert(END, self.CPU.memory_monitor[address])
+        for address in self.memory_monitor:
+            self.memory_display_list.insert(END,
+                                    self.CPU.memory.memory.get(int(address), 4))
 
-    def set_dataRegister_view(self, view = None):
-        if view != None:
+    def update_ccr(self):
+        X = self.CPU.ccr.get_X()
+        N = self.CPU.ccr.get_N()
+        Z = self.CPU.ccr.get_Z()
+        V = self.CPU.ccr.get_V()
+        C = self.CPU.ccr.get_C()
+        self.CCR_value_lbl.config(text="{} {} {} {} {}".format(X, N, Z, V, C))
+
+    def set_dataRegister_view(self, view=None):
+        if view is not None:
             self.data_view = view
         else:
             view = self.data_view
@@ -257,8 +271,8 @@ class simulator_gui:
             else:
                 self.dataRegisters[i].config(text=self.CPU.D[i].get())
 
-    def set_addressRegister_view(self, view = None):
-        if view != None:
+    def set_addressRegister_view(self, view=None):
+        if view is not None:
             self.address_view = view
         else:
             view = self.address_view
@@ -285,6 +299,8 @@ class simulator_gui:
         self.CPU.pc.exec_line()
         # changes = self.CPU.check_for_change()
         self.update_mem()
+        self.display_register()
+        self.update_ccr()
 
         # if changes:  # If there are changes, display and highlight them
         self.display_register()

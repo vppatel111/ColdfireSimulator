@@ -25,6 +25,18 @@ class Resources():
         else:
             return self.source
 
+    def get_source_address(self, o = None):
+        '''
+        Returns:    The address stored within the source, only works with
+                    effective addresses.
+        '''
+        if o != None:
+            self.source = o
+        if isinstance(self.source, EffectiveAddress):  # Push in effective add
+            return self.source.get_address(self.size)
+        elif isinstance(self.source, AddressRegister):
+            return self.source.get_address(self.size)
+
     def get_dest(self, o = None):
         '''
         Returns:    The value stored within the destination.
