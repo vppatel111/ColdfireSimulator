@@ -7,6 +7,9 @@ class Resources():
     This class contains all the frequently used methods that other classes may
     potentially need.
     '''
+    def __init__(cls, cpu):
+        cls._cpu = cpu
+        
     def get_source(self, o = None):
         '''
         Returns:    The value stored within the source.

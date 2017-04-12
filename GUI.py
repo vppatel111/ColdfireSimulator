@@ -14,20 +14,19 @@ from tkinter import *
 from unparser import AssemblyFileReader
 from CPU import CPU
 
-
 class simulator_gui:
 
     def __init__(self, master):
 
-        self.CPU = CPU()
+        self.CPU = None
 
         self.master = master
         master.title("ColdFire Simulator")
         # master.resizeable(width=False, height=False)
         master.geometry('{}x{}'.format(1400, 889))  # width x height
 
-        self.address_view = "dec"  # Initialize view base
-        self.data_view = "dec"
+        self.address_view = "hex"  # Initialize view base
+        self.data_view = "hex"
         self.screen_resolution = 1080
 
         # Text box for code
@@ -243,49 +242,54 @@ class simulator_gui:
         for address in self.CPU.memory_monitor:
             self.memory_display_list.insert(END, self.CPU.memory_monitor[address])
 
-    def set_dataRegister_view(self, view):
-
-        self.data_view = view
-
-        for i in range(8):
-            # print(self.CPU.current_dataR_values[i])
-            if view == "bin":
-                self.dataRegisters[i].config(text=bin(self.CPU.current_dataR_values[i]))
-            elif view == "hex":
-                self.dataRegisters[i].config(text=hex(self.CPU.current_dataR_values[i]))
-            else:
-                self.dataRegisters[i].config(text=(self.CPU.current_dataR_values[i]))
-
-    def set_addressRegister_view(self, view):
-
-        self.address_view = view
+    def set_dataRegister_view(self, view = None):
+        if view != None:
+            self.data_view = view
+        else:
+            view = self.data_view
 
         for i in range(8):
-            # print(self.CPU.current_addressR_values[i])
+            print(self.CPU.D[i].get())
+            if view == "bin":
+                self.dataRegisters[i].config(text=bin(self.CPU.D[i].get()))
+            elif view == "hex":
+                self.dataRegisters[i].config(text=hex(self.CPU.D[i].get()))
+            else:
+                self.dataRegisters[i].config(text=self.CPU.D[i].get())
+
+    def set_addressRegister_view(self, view = None):
+        if view != None:
+            self.address_view = view
+        else:
+            view = self.address_view
+
+        for i in range(8):
+            print(self.CPU.A[i].get())
             if view == "bin":
                 self.addressRegisters[i].config(
-                                text=bin(self.CPU.current_addressR_values[i]))
+                                text=bin(self.CPU.A[i].get()))
             elif view == "hex":
                 self.addressRegisters[i].config(
-                                text=hex(self.CPU.current_addressR_values[i]))
+                                text=hex(self.CPU.A[i].get()))
             else:
                 self.addressRegisters[i].config(
-                                text=(self.CPU.current_addressR_values[i]))
+                                text=(self.CPU.A[i].get()))
 
     def reset_line(self):
         self.current_line_number = 1
+        self.pc.n = 0
         self.Code_View_lbl.tag_remove("current_line", 1.0, "end")
         self.Code_View_lbl.tag_add("current_line", 1.0, 2.0)
 
     def next_line(self):  # TODO: Constrain next line to max num of lines
-        self.CPU.execute_line(self.current_line_number)
-        changes = self.CPU.check_for_change()
+        self.CPU.pc.exec_line()
+        # changes = self.CPU.check_for_change()
         self.update_mem()
 
-        if changes:  # If there are changes, display and highlight them
-            self.display_register_changes(changes)
+        # if changes:  # If there are changes, display and highlight them
+        # self.display_register_changes(changes)
 
-        self.current_line_number += 1
+        self.current_line_number = self.CPU.pc.n + 1
 
         highlight_start = str(self.current_line_number) + ".0"
         highlight_end = str(self.current_line_number + 1) + ".0"
@@ -299,10 +303,10 @@ class simulator_gui:
         SimulatorMain.py and displays the text in the Text widget, additionally
         it calls an unparser to process the file.
         """
-        assembler = AssemblyFileReader('test.s')
-        assembler.read_into_list()
+        self.CPU = CPU('test.s')
+        # assembler.read_into_list()
         file_data = ''
-        for e in assembler._file:  # Create a large formatted string to be disp
+        for e in self.CPU.assembler._file:  # Create a large formatted string to be disp
             file_data += e
         self.Code_View_lbl.delete(1.0, END)  # Clear text
         self.Code_View_lbl.insert(END, file_data)  # Insert the file text
@@ -310,19 +314,21 @@ class simulator_gui:
         self.Code_View_lbl.tag_remove("current_line", 1.0, "end")
         self.Code_View_lbl.tag_add("current_line", 1.0, 2.0)
 
-    def display_register_changes(self, changes):
-        for change in changes:
-            if change[0] == "D":
-                if self.data_view == "bin":
-                    self.dataRegisters[int(change[1])].config(text=bin(changes[change]))
-                elif self.data_view == "hex":
-                    self.dataRegisters[int(change[1])].config(text=hex(changes[change]))
-                else:
-                    self.dataRegisters[int(change[1])].config(text=changes[change])
-            elif change[0] == "A":
-                if self.address_view == "bin":
-                    self.addressRegisters[int(change[1])].config(text=bin(changes[change]))
-                elif self.address_view == "hex":
-                    self.addressRegisters[int(change[1])].config(text=hex(changes[change]))
-                else:
-                    self.addressRegisters[int(change[1])].config(text=changes[change])
+    def display_register(self):
+        set_dataRegister_view()
+        set_addressRegister_view()
+        # for change in changes:
+        #     if change[0] == "D":
+        #         if self.data_view == "bin":
+        #             self.dataRegisters[int(change[1])].config(text=bin(changes[change]))
+        #         elif self.data_view == "hex":
+        #             self.dataRegisters[int(change[1])].config(text=hex(changes[change]))
+        #         else:
+        #             self.dataRegisters[int(change[1])].config(text=changes[change])
+        #     elif change[0] == "A":
+        #         if self.address_view == "bin":
+        #             self.addressRegisters[int(change[1])].config(text=bin(changes[change]))
+        #         elif self.address_view == "hex":
+        #             self.addressRegisters[int(change[1])].config(text=hex(changes[change]))
+        #         else:
+        #             self.addressRegisters[int(change[1])].config(text=changes[change])

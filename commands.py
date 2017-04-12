@@ -17,7 +17,6 @@ size_dict = {
 		'b' : 1,
 }
 
-
 class Command(Resources):
 	'''
 	The base command file that contains the common attributes for all the commands
