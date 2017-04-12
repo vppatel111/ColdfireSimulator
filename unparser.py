@@ -6,7 +6,6 @@ from resources import Resources
 
 DEBUG = True
 
-
 class line(Resources):
     '''
     The line object contains and handles all the processing of the assembly line

@@ -328,7 +328,7 @@ class simulator_gui:
         SimulatorMain.py and displays the text in the Text widget, additionally
         it calls an unparser to process the file.
         """
-        self.CPU = CPU('test'+'.s')
+        self.CPU = CPU('midtermFC1'+'.s')
         # assembler.read_into_list()
         file_data = ''
         for e in self.CPU.assembler._file:  # Create a large formatted string to be disp

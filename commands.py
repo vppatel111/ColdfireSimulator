@@ -73,7 +73,7 @@ class Command(Resources):
 
 		  'sub':		lambda: self.sub(),
 		  'suba':		lambda: self.suba(),
-		  # 'subi':		lambda: self.subi(), -- Extra
+		  'subi':		lambda: self.subi(),
 		  # 'subq':		lambda: self.subq(), -- Extra
 		  # 'subx':		lambda: self.subx(), -- Extra
 
@@ -319,11 +319,11 @@ class Command(Resources):
 			new_d = self.get_dest()
 
 			# CCR: * * * * *
-			ccr.set(X = None,
+			ccr.set(
 					N = ccr.check_N(new_d),
 					Z = ccr.check_Z(new_d),
 					V = ccr.check_V(old_s, old_d, new_d),
-					C = ccr.check_C(old_d + old_s))
+					C = ccr.check_C(old_d + old_s, X = True))
 
 
 	# Breaks properly.
@@ -372,7 +372,7 @@ class Command(Resources):
 						N = ccr.check_N(new_d),
 						Z = ccr.check_Z(new_d),
 						V = ccr.check_V(old_s, old_d, new_d),
-						C = ccr.check_C(old_d + old_s))
+						C = ccr.check_C(old_d + old_s, True))
 
 		else:
 			print("Error: Invalid Destination")
@@ -404,7 +404,7 @@ class Command(Resources):
 					N = ccr.check_N(new_d),
 					Z = ccr.check_Z(new_d),
 					V = ccr.check_V(-1*old_s, old_d, new_d),
-					C = ccr.check_C(old_d + -1*old_s))
+					C = ccr.check_C(old_d + -1*old_s, True))
 
 	def suba(self):
 		# Subtracts any source and destination address register together.
@@ -438,6 +438,12 @@ class Command(Resources):
 
 		else:
 			print("Error: Invalid Destination")
+
+	def subi(self):
+		if type(self.source) == int:
+			self.sub()
+		else:
+			raise Exception("Source is not an immediate value!")
 
 	def clr(self):
 		if isinstance(self.source, DataRegister):
@@ -527,7 +533,19 @@ class Command(Resources):
 		pass
 
 	def neg(self):
-		pass
+		if isinstance(self.source, DataRegister):
+			old_s = self.get_source()
+			self.set_source(0-old_s, 4)
+			s = self.get_source()
+			ccr.set(
+				N = ccr.check_N(s),
+				Z = ccr.check_Z(s),
+				V = ccr.check_V(0, s, old_s),
+				C = ccr.check_C(s, True)
+			)
+		else:
+			raise Exception("Source not a data register!")
+
 
 	def asl(self):
 
@@ -547,7 +565,7 @@ class Command(Resources):
 				new_d = self.get_dest()  # For ccr calc.
 
 				# CCR: * * * 0 *
-				ccr.set(X = None,
+				ccr.set(X = C_bit,
 						N = ccr.check_N(new_d),
 						Z = ccr.check_Z(new_d),
 						V = 0,
@@ -575,7 +593,7 @@ class Command(Resources):
 				new_d = self.get_dest()
 
 				# CCR: * * * 0 *
-				ccr.set(X = None,
+				ccr.set(X = C_bit,
 						N = ccr.check_N(new_d),
 						Z = ccr.check_Z(new_d),
 						V = 0,
@@ -599,12 +617,18 @@ class Command(Resources):
 			self.set_dest(d, 4)
 			new_d = self.get_dest()  # For ccr calculations
 
-			# CCR: * * * 0 0
+			# CCR: - * * 0 0
 			ccr.set(X = None,
 					N = ccr.check_N(new_d),
 					Z = ccr.check_Z(new_d),
 					V = 0,
 					C = 0)
+
+	def _andi(self):
+		if type(self.source) == int:
+			self._and()
+		else:
+			raise Exception("The source is not an immediate value!")
 
 	def _or(self):
 
@@ -628,7 +652,7 @@ class Command(Resources):
 
 	def _eor(self):
 
-		if isinstance(self.source, DataRegister):
+		if isinstance(self.dest, DataRegister):
 			z = self.size
 			if z == 1 or z == 2:
 				print("Error: Invalid Size")

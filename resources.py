@@ -9,7 +9,7 @@ class Resources():
     '''
     def __init__(cls, cpu):
         cls._cpu = cpu
-        
+
     def get_source(self, o = None):
         '''
         Returns:    The value stored within the source.
@@ -80,7 +80,7 @@ class Resources():
         elif isinstance(self.source, AddressRegister):
             self.source.set(val, size)
 
-    def sign_extend(val):
+    def sign_extend(self, val):
         '''
         Sign extends val then returns new val. The extension only works for
         word sized val.
@@ -88,4 +88,15 @@ class Resources():
         extension_bit = (val >> 15)&1
         if extension_bit == 1 and val <= 0xFFFF:
             val |= 0xFFFF0000
+        return val
+
+    def twos_complement(self, val, size):
+        if (val >> size*8-1)&1 == 1: # the value should be treated as a negative
+            count = size*8-1
+            pos = 0
+            while count > -1:
+                if (val>>count)&1 == 1:
+                    pos += 1<<count
+                count -= 1
+            return -1*(count << size*8)+pos
         return val
