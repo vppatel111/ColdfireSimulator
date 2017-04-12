@@ -54,10 +54,6 @@ class line(Resources):
         # execute command:
         if DEBUG and print(self.label, self.command, self.size, self.source, self.dest): pass
         Command(self.command, self.size, self.source, self.dest)
-
-        s = 0
-        d = 0
-
         # if self.source is not None:
         #     s = self.get_source()
         # if self.dest is not None:

@@ -138,7 +138,6 @@ class simulator_gui:
 
         # Next/Prev Line Buttons
         # TODO: Add functionality to buttons as well.
-        self.current_line_number = 1
         self.next_btn = Button(master, text="Next Line", command=self.next_line)
         self.next_btn.grid(row=18, column=1)
 
@@ -208,20 +207,33 @@ class simulator_gui:
 
         self.memory_display_lbl.config(font=("FreeSans", 10))
 
+    def string_to_num(self, lovelyString):
+        if lovelyString.startswith('0x'):
+            lovelyNum = int(lovelyString, 16)
+        elif lovelyString.startswith('0b'):
+            lovelyNum = int(lovelyString, 2)
+        elif lovelyString.startswith('0o'):
+            lovelyNum = int(lovelyString, 8)
+        else:
+            lovelyNum = int(lovelyString)
+        return lovelyNum
+
     def add_monitor(self):
 
         def get_input():
             # print(user_input.get())
             address = user_input.get()
+            address_list = [a.strip() for a in address.split(',')]
             print(address)
 
             # if not self.CPU.add_memory_monitor(address):  # TODO: Give error
             #     print("Error: Invalid memory address")
             #
-
-            print("add", address)
-            self.memory_monitor[address] = self.CPU.memory.memory.get(int(address), 4)
-            print(self.CPU.memory.memory.get(int(address), 1))
+            for address in address_list:
+                address = self.string_to_num(address)
+                print("add", hex(address))
+                self.memory_monitor[address] = self.CPU.memory.memory.get(address, 1)
+                print(self.CPU.memory.memory.get(address, 1))
 
             self.update_mem()
             prompt_monitor.destroy()
@@ -244,9 +256,9 @@ class simulator_gui:
     def update_mem(self):
         self.memory_display_list.delete(0, END)
         self.memory_display2_list.delete(0, END)
-        for address in self.memory_monitor:
+        for address in sorted(self.memory_monitor.keys()):
             self.memory_display_list.insert(END,
-                                    self.CPU.memory.memory.get(int(address), 4))
+                                    "{}: {}".format(hex(address), hex(self.CPU.memory.memory.get(address, 1))))
 
     def update_ccr(self):
         X = self.CPU.ccr.get_X()
@@ -290,25 +302,22 @@ class simulator_gui:
                                 text=(self.CPU.A[i].get()))
 
     def reset_line(self):
-        self.current_line_number = 1
         self.CPU.pc.n = 0
+        # self.CPU.pc.n = 0
         self.Code_View_lbl.tag_remove("current_line", 1.0, "end")
         self.Code_View_lbl.tag_add("current_line", 1.0, 2.0)
 
     def next_line(self):  # TODO: Constrain next line to max num of lines
+        highlight_start = str(self.CPU.pc.n+1) + ".0"
+        highlight_end = str(self.CPU.pc.n + 2) + ".0"
         self.CPU.pc.exec_line()
+        # self.CPU.pc.n = self.CPU.pc.n
         # changes = self.CPU.check_for_change()
         self.update_mem()
         self.display_register()
         self.update_ccr()
-
         # if changes:  # If there are changes, display and highlight them
         self.display_register()
-
-        self.current_line_number = self.CPU.pc.n + 1
-
-        highlight_start = str(self.current_line_number) + ".0"
-        highlight_end = str(self.current_line_number + 1) + ".0"
         self.Code_View_lbl.tag_remove("current_line", 1.0, "end")
         self.Code_View_lbl.tag_add("current_line", highlight_start,
                                    highlight_end)
@@ -323,7 +332,8 @@ class simulator_gui:
         # assembler.read_into_list()
         file_data = ''
         for e in self.CPU.assembler._file:  # Create a large formatted string to be disp
-            file_data += e
+            if e.strip() != '':
+                file_data += e
         self.Code_View_lbl.delete(1.0, END)  # Clear text
         self.Code_View_lbl.insert(END, file_data)  # Insert the file text
         self.Code_View_lbl.tag_configure("current_line", background="#e9e9e9")

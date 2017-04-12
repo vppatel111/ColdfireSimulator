@@ -34,17 +34,6 @@ class CPU():
         #     self.current_addressR_values[i] = 0
 
     # NOTE: Creates a mem location, even if it is never used.
-    def string_to_num(self, lovelyString):
-        if lovelyString.startswith('0x'):
-            lovelyNum = int(lovelyString, 16)
-        elif lovelyString.startswith('0b'):
-            lovelyNum = int(lovelyString, 2)
-        elif lovelyString.startswith('0o'):
-            lovelyNum = int(lovelyString, 8)
-        else:
-            lovelyNum = int(lovelyString)
-        return lovelyNum
-
     def add_memory_monitor(self, address):
         print("add", address)
         address = self.string_to_num(address)

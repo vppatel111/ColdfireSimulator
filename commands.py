@@ -129,7 +129,7 @@ class Command(Resources):
 		self.set_dest(s+d, z)
 		new_d = self.get_dest()
 		# CCR: - * * 0 0
-		ccr.set(N = ccr.check_N(new_d), Z = ccr.check_Z(new_d), V = 0, C = 0)
+		ccr.set(N = ccr.check_N(s, z), Z = ccr.check_Z(s), V = 0, C = 0)
 
 	# NOTE: If the code is wrong it breaks before this check even happens.
 	def movea(self):
@@ -342,7 +342,7 @@ class Command(Resources):
 				self.set_dest(s+d, z)
 
 				# CCR: - - - - -
-				ccr.set(X = 0, N = 0, Z = 0, V = 0, C = 0)
+				ccr.set()
 		else:
 			print("Error: Invalid Destination")
 
@@ -404,7 +404,7 @@ class Command(Resources):
 					N = ccr.check_N(new_d),
 					Z = ccr.check_Z(new_d),
 					V = ccr.check_V(old_s, old_d, new_d),
-					C = ccr.check_C(old_d + old_s))
+					C = ccr.check_C(old_d + -1*old_s))
 
 	def suba(self):
 		# Subtracts any source and destination address register together.
