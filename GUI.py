@@ -469,6 +469,7 @@ class simulator_gui:
         self.CPU = CPU(file_directory+'.s')
         # self.CPU = CPU('test.s')
 
+
         self.Code_View_lbl.delete(1.0, END)  # Clear text
 
         highlight_start = 0

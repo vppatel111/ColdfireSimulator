@@ -68,13 +68,13 @@ class Command(Resources):
 		  'add':		lambda: self.add(),
 		  'adda':		lambda: self.adda(),
 		  'addi':		lambda: self.addi(),
-		  # 'addq':		lambda: self.addi(),  -- Extra
+		  'addq':		lambda: self.addi(),
 		  # 'addx':		lambda: self.addi(),  -- Extra
 
 		  'sub':		lambda: self.sub(),
 		  'suba':		lambda: self.suba(),
 		  'subi':		lambda: self.subi(),
-		  # 'subq':		lambda: self.subq(), -- Extra
+		  'subq':		lambda: self.subq(),
 		  # 'subx':		lambda: self.subx(), -- Extra
 
 		  'divs':		lambda: self.divs(),  # Necessary
@@ -303,27 +303,23 @@ class Command(Resources):
 		s = self.get_source()
 		d = self.get_dest()
 
-		old_s = self.get_source()  # Used for ccr calculations
-		old_d = self.get_dest()
-
 		z = self.size
 		if z == 1:
 			print("Error: Invalid size")
 		elif z == 2:
 			print("Error: Invalid Size")
 		elif z == 4:
-			s &= 0xffffffff  # This may be unnecessary
-			result = (s+d) & 0xffffffff  # Calculate and truncate
+			result = s+d  # Calculate and truncate
 			# print("SUPER DUPER RESULT", result)
-			self.set_dest((result), z)
+			self.set_dest(result, z)
 			new_d = self.get_dest()
-
+			print(s, d, result)
 			# CCR: * * * * *
 			ccr.set(
 					N = ccr.check_N(new_d),
 					Z = ccr.check_Z(new_d),
-					V = ccr.check_V(old_s, old_d, new_d),
-					C = ccr.check_C(old_d + old_s, X = True))
+					V = ccr.check_V(s, d, new_d),
+					C = ccr.check_C(result, X = True))
 
 
 	# Breaks properly.
@@ -348,35 +344,35 @@ class Command(Resources):
 
 	def addi(self):
 		# Adds any source and destination together.
-		if isinstance(self.dest, DataRegister):
+		if isinstance(self.dest, DataRegister) and type(self.source) == int:
 			s = self.get_source()
 			d = self.get_dest()
 			z = self.size
-
-			old_s = self.get_source()  # Used for ccr calc.
-			old_d = self.get_dest()
 
 			if z == 1:
 				print("Error: Invalid size")
 			elif z == 2:
 				print("Error: Invalid size")
 			elif z == 4:
-				s &= 0xffffffff
-
-				result = (s+d) & 0xffffffff  # Calculate and truncate
-				self.set_dest((result), z)
+				result = (s+d) # Calculate and truncate
+				self.set_dest(result, z)
 				new_d = self.get_dest()
-
+				print(s, d, result)
 				# CCR: * * * * *
-				ccr.set(X = None,
+				ccr.set(
 						N = ccr.check_N(new_d),
 						Z = ccr.check_Z(new_d),
-						V = ccr.check_V(old_s, old_d, new_d),
-						C = ccr.check_C(old_d + old_s, True))
+						V = ccr.check_V(s, d, new_d),
+						C = ccr.check_C(result, True))
 
 		else:
 			print("Error: Invalid Destination")
 
+	def addq(self):
+		if type(self.source) == int and self.source >= 0 and self.source <= 7:
+			self.addi()
+		else:
+			raise Exception("Source not an immediate value!")
 
 	def sub(self):
 		# Subtracts any source and destination together.
@@ -444,6 +440,12 @@ class Command(Resources):
 			self.sub()
 		else:
 			raise Exception("Source is not an immediate value!")
+
+	def subq(self):
+		if type(self.source) == int and self.source >= 0 and self.source <= 7:
+			self.sub()
+		else:
+			raise Exception("Source is not an immediate value")
 
 	def clr(self):
 		if isinstance(self.source, DataRegister):
@@ -769,8 +771,9 @@ class Command(Resources):
 
 	def pea(self):  # NOTE: A7 or SP is initialized in registers.
 		s = self.get_source_address()
-
-		next_add = A[7].get() + 4
-		memory.memory.set(A[7].get(), next_add, 4)
+		a = memory.memory.get_EA(A[7])
+		a.set(s, 4)
+		next_add = A[7].get() - 4
+		A[7].set(next_add, 4)
 
 		# CCR: - - - - -
