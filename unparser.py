@@ -78,24 +78,25 @@ class line(Resources):
         if isinstance(self.dest, EffectiveAddress):
             self.dest._inc = self.d_inc
 
+
 class AssemblyFileReader():
     '''
     Reads through the '.s' file and converts the assembly commands into python
     command for later execution.
-    #NOTE:  Still a work in progresses as we might need to change a few elements
+    #NOTE:  Still a work in progress as we might need to change a few elements
             when dealing with multiple files.
     #TODO:  -Fix the scale factor parsing.
             -Commenting is not supported yet.
     '''
-    def __init__(self, file_name = None):
+    def __init__(self, file_name=None):
         self._filename = file_name  # file name
         self._file = []             # file unparsed
         self._line_a = []           # file parsed (assembly)
         self._line_p = dict()       # file parsed (python)
         self._label_dict = dict()   # to organize label to a line number
-    #IDEA: potentially use a dictionary if we have multiple files?
+    # IDEA: potentially use a dictionary if we have multiple files?
 
-    def read_into_list(self, file_name = None):
+    def read_into_list(self, file_name=None):
         '''
         Invokes various methods to seperate, the label, command, size,
         source, and destination into a tuple for further parsing.
