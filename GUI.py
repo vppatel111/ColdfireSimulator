@@ -23,7 +23,7 @@ class simulator_gui:
         self.master = master
         master.title("ColdFire Simulator")
         # master.resizeable(width=False, height=False)
-        master.geometry('{}x{}'.format(1400, 889))  # width x height
+        master.geometry('{}x{}'.format(1510, 889))  # width x height
         # master.config(background="#202020")
 
         self.address_view = "hex"  # Initialize view base
@@ -89,6 +89,28 @@ class simulator_gui:
                 label.grid(row=spacer, column=2+column_offset)
             counter += 1
 
+        self.addressRegisters_value_lbl = []
+        for i in range(8):
+
+            if i < 4:
+                txt="A"+str(i)+":"
+            else:
+                txt = ":"+"A"+str(i)
+
+            self.addressRegisters_value_lbl.append(Label(master, text=txt,
+                                               font=("FreeSans", 12), padx=10))
+
+        counter = 0
+        for label in self.addressRegisters_value_lbl:
+            if counter < 4:
+                spacer = 6+counter
+                label.grid(row=spacer, column=1)
+            else:
+                spacer = 2+counter
+                label.grid(row=spacer, column=2+column_offset+1)
+            counter += 1
+
+
         # Data Register Labels - rows 10-14, col = 1,2
         # hardcoded constants: spacer = 13th row + offset, columns
         # Also note spacer is based on counter.
@@ -110,16 +132,37 @@ class simulator_gui:
                 label.grid(row=spacer, column=2+column_offset)
             counter += 1
 
+        self.dataRegisters_value_lbl = []
+        for i in range(8):
+
+            if i < 4:
+                txt="D"+str(i)+":"
+            else:
+                txt = ":"+"D"+str(i)
+
+            self.dataRegisters_value_lbl.append(Label(master, text=txt,
+                                               font=("FreeSans", 12), padx=10))
+
+        counter = 0
+        for label in self.dataRegisters_value_lbl:
+            if counter < 4:
+                spacer = 11+counter
+                label.grid(row=spacer, column=1)
+            else:
+                spacer = 7+counter
+                label.grid(row=spacer, column=2+column_offset+1)
+            counter += 1
+
         # Memory Scroll box
         self.memory_display_lbl = Label(master, text="Memory: ",
                                         font=("FreeSans", 12))
         self.memory_display_lbl.grid(row=15, column=1, columnspan=2+column_offset)
 
         self.memory_display_list = Listbox(master)
-        self.memory_display_list.grid(row=16, column=1+column_offset)
+        self.memory_display_list.grid(row=16, column=1+column_offset, columnspan=2)
 
-        self.memory_display2_list = Listbox(master)
-        self.memory_display2_list.grid(row=16, column=2+column_offset)
+        # self.memory_display2_list = Listbox(master)
+        # self.memory_display2_list.grid(row=16, column=2+column_offset)
 
         self.add_memory_btn = Button(master, text="Add", command=self.add_monitor)
         self.add_memory_btn.grid(row=17, column=1+column_offset)
@@ -197,7 +240,7 @@ class simulator_gui:
     def change_res(self, res):
 
         if res == 768:
-            self.master.geometry('{}x{}'.format(1139, 648))  # width x height
+            self.master.geometry('{}x{}'.format(1211, 648))  # width x height
 
             self.Code_View_lbl.config(width=80, height=40)
             self.CCR_lbl.config(font=("FreeSans", 10))
@@ -220,7 +263,7 @@ class simulator_gui:
             self.memory_display_lbl.config(font=("FreeSans", 10))
 
         elif res == 1080:
-            self.master.geometry('{}x{}'.format(1400, 889))  # width x height
+            self.master.geometry('{}x{}'.format(1510, 889))  # width x height
 
             self.Code_View_lbl.config(width=100, height=60)
             self.CCR_lbl.config(font=("FreeSans", 15))
