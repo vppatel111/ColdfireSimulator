@@ -68,13 +68,13 @@ class Command(Resources):
 		  'add':		lambda: self.add(),
 		  'adda':		lambda: self.adda(),
 		  'addi':		lambda: self.addi(),
-		  # 'addq':		lambda: self.addi(),  -- Extra
+		  'addq':		lambda: self.addi(),
 		  # 'addx':		lambda: self.addi(),  -- Extra
 
 		  'sub':		lambda: self.sub(),
 		  'suba':		lambda: self.suba(),
 		  'subi':		lambda: self.subi(),
-		  # 'subq':		lambda: self.subq(), -- Extra
+		  'subq':		lambda: self.subq(),
 		  # 'subx':		lambda: self.subx(), -- Extra
 
 		  'divs':		lambda: self.divs(),  # Necessary
@@ -348,7 +348,7 @@ class Command(Resources):
 
 	def addi(self):
 		# Adds any source and destination together.
-		if isinstance(self.dest, DataRegister):
+		if isinstance(self.dest, DataRegister) and type(self.source) == int:
 			s = self.get_source()
 			d = self.get_dest()
 			z = self.size
@@ -377,6 +377,11 @@ class Command(Resources):
 		else:
 			print("Error: Invalid Destination")
 
+	def addq(self):
+		if type(self.source) == int and self.source >= 0 and self.source <= 7:
+			self.addi()
+		else:
+			raise Exception("Source not an immediate value!")
 
 	def sub(self):
 		# Subtracts any source and destination together.
@@ -441,6 +446,12 @@ class Command(Resources):
 
 	def subi(self):
 		if type(self.source) == int:
+			self.sub()
+		else:
+			raise Exception("Source is not an immediate value!")
+
+	def subq(self):
+		if type(self.source) == int and self.source >= 0 and self.source <= 7:
 			self.sub()
 		else:
 			raise Exception("Source is not an immediate value!")

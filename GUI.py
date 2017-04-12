@@ -333,7 +333,7 @@ class simulator_gui:
 
     def update_mem(self):
         self.memory_display_list.delete(0, END)
-        self.memory_display2_list.delete(0, END)
+        # self.memory_display2_list.delete(0, END)
         for address in sorted(self.memory_monitor.keys()):
             self.memory_display_list.insert(END,
                                     "{}: {}".format(hex(address), hex(self.CPU.memory.memory.get(address, 1))))
