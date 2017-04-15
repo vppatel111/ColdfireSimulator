@@ -114,7 +114,7 @@ class CCR():
         is not None, then it also sets the X flag.
         '''
         C = (v >> 8*4)&1
-        print(hex(v), C)
+        # print(hex(v), C)
         if X != None:
             X = C
         self.set(X = X, C = C)

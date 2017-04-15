@@ -678,6 +678,7 @@ class simulator_gui:
             line_number += 1
 
         # Also display the current line selection
+        self.reset_line()
         self.Code_View_lbl.tag_configure("current_line", background="#e9e9e9")
         self.Code_View_lbl.tag_remove("current_line", 1.0, "end")
         self.Code_View_lbl.tag_add("current_line", 1.0, 2.0)

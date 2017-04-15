@@ -21,37 +21,56 @@ directory:
 
 Though they should already be contained within the zip file.
 
-How to run the program:
-1 - Make sure you're in the same directory as the above files in the terminal.
-2 - If you would like to test one of your own assembly files, import them into the
-"AssemblyTest" folder. By default, we put in a few our assignment assembly codes.
-3 - Simply type "python3 SimulatorMain.py" in the terminal without any quotations
-and the GUI should start.
-
-How to use the program:
+How to use the GUI:
 - At this time we only support two resolutions which are: 1920x1080 and 1366x768.
 You can can choose whichever resolution you prefer under the "Screen Resolution"
  option at the top.
 - You may also choose to change the Theme of the simulator under the "Set Theme"
 option at the top. This is still also a work progress.
+- You can change the way the data register and address registers values are
+displayed from hex to binary or decimal by choosing them under the
+"Data Register" and "Address Register" panels.
+- To scroll the listbox, select and item in the list box and use the arrow keys
+to move the selection up or down.
 
-1. To load a file from the "AssemblyTest" folder simply type the name of the '.s'
-file with out the '.s' in the popup box after hitting "Loadfile" at the top left.
-For example you can load the 'test.s' file by simply typing in 'test'.
+How to run the program:
+1. Make sure you're in the same directory as the above files in the terminal.
+2. If you would like to test one of your own assembly files, import them into the
+"AssemblyTest" folder. By default, we put in a few of our assignment assembly
+codes with solutions that display relevant changes in registers and memory.
+3. Simply type "python3 SimulatorMain.py" in the terminal without any quotations
+and the GUI should start.
+4. To load a file from the "AssemblyTest" folder simply type the name of the '.s'
+file with out the '.s' in the pop-up box after hitting "Loadfile" at the top left.
+For example you can load the 'test.s' file by simply typing in 'test'. The
+assembly code should show up in the Text widget.
+
+NOTE: Though the code in the Text widget is interactable, doing so will not
+affect program execution.
+
 - Labels are color coded in red while commands are in blue, size is in orange,
 sources are in green, and destinations are also in purple.
-2. To move to the next line, simply hit next at the bottom right of GUI.
+
+5. To move to the next line, simply hit next at the bottom right of GUI.
+
 - After each line is executed, you can see the effects it has on the
 data register, address register, CCR register, and the memory.
 - To see the desired memory location you can "add" the memory to the memory map
 in hex, octal, decimal, or binary format as a comma separated list. For example
 hitting the "add" button and typing in "0x1000, 0x1001" into the popup box, you
 can see the effects of the first line has on the memory for the 'test.s' file.
-- You can change the way the data register and address registers values are
-displayed from hex to binary or decimal by choosing them under the
-"Data Register" and "Address Register" panels.
-- Finally you can reset the execution of the file using the "Reset" button.
+- To remove these memory monitors, the desired monitor to remove must be
+selected from the listbox, then the "remove" button will remove that monitor
+from the display.
+
+NOTE: Each specified memory location only displays a byte of data.
+
+6. Finally you can reset the execution of the file using the "Reset" button.
 
 Additional Notes: - The stack pointer, due to lack of convention, is initialized
 to 0xfffff for our Simulator.
 - The OP code generation feature is unimplemented due to time constraints.
+- All test files come with a solution that contains the relevant changes in
+memory.
+- Recommended test file: "test", which will show off our various move and
+arithmetic commands as well as branching.

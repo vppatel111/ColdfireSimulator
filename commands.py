@@ -310,7 +310,7 @@ class Command(Resources):
 			# print("SUPER DUPER RESULT", result)
 			self.set_dest(result, z)
 			new_d = self.get_dest()
-			print(s, d, result)
+			# print(s, d, result)
 			# CCR: * * * * *
 			ccr.set(
 					N = ccr.check_N(new_d),
@@ -352,7 +352,7 @@ class Command(Resources):
 				result = (s+d) # Calculate and truncate
 				self.set_dest(result, z)
 				new_d = self.get_dest()
-				print(s, d, result)
+				# print(s, d, result)
 				# CCR: * * * * *
 				ccr.set(
 						N = ccr.check_N(new_d),
@@ -416,7 +416,6 @@ class Command(Resources):
 				s &= 0xffffffff
 
 				result = (d-s) & 0xffffffff  # Truncate
-				# print("SUPER DUPER RESULT", result)
 				self.set_dest((result), z)
 				new_d = self.get_dest()
 
