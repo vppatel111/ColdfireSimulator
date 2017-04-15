@@ -2,6 +2,7 @@ from commands import *
 from registers import *
 from memory import *
 
+
 class Resources():
     '''
     This class contains all the frequently used methods that other classes may
@@ -10,11 +11,11 @@ class Resources():
     def __init__(cls, cpu):
         cls._cpu = cpu
 
-    def get_source(self, o = None):
+    def get_source(self, o=None):
         '''
         Returns:    The value stored within the source.
         '''
-        if o != None:
+        if o is not None:
             self.source = o
         if isinstance(self.source, EffectiveAddress):
             return self.source.get(self.size)
@@ -30,7 +31,7 @@ class Resources():
         Returns:    The address stored within the source for type EA
                     or returns register number for registers.
         '''
-        if o != None:
+        if o is not None:
             self.source = o
         if isinstance(self.source, EffectiveAddress):  # Push in effective add
             return self.source._address
@@ -47,7 +48,7 @@ class Resources():
         Returns:    The address stored within the dest for type EA
                     or returns register number for registers.
         '''
-        if o != None:
+        if o is not None:
             self.source = o
         if isinstance(self.source, EffectiveAddress):  # Push in effective add
             return self.dest._address
@@ -59,11 +60,11 @@ class Resources():
             return self.dest.get_tag()
             # print("D D")
 
-    def get_dest(self, o = None):
+    def get_dest(self, o=None):
         '''
         Returns:    The value stored within the destination.
         '''
-        if o != None:
+        if o is not None:
             self.dest = o
         if isinstance(self.dest, EffectiveAddress):
             return self.dest.get(self.size)
@@ -107,21 +108,23 @@ class Resources():
         Sign extends val then returns new val. The extension only works for
         word sized val.
         '''
-        extension_bit = (val >> 15)&1
+        extension_bit = (val >> 15) & 1
         if extension_bit == 1 and val <= 0xFFFF:
             val |= 0xFFFF0000
         return val
 
     def twos_complement(self, val, size):
         '''
-        Gets the two's complement of a given value based on a size for sign extension.
+        Gets the two's complement of a given value based on a size for sign
+        extension.
         '''
-        if (val >> size*8-1)&1 == 1: # the value should be treated as a negative
+        # the value should be treated as a negative
+        if (val >> size*8-1) & 1 == 1:
             count = size*8-1
             pos = 0
             while count > -1:
-                if (val>>count)&1 == 1:
-                    pos += 1<<count
+                if (val >> count) & 1 == 1:
+                    pos += 1 << count
                 count -= 1
             return -1*(count << size*8)+pos
         return val

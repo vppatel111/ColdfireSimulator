@@ -29,7 +29,7 @@ class simulator_gui:
         self.master = master
         master.title("ColdFire Simulator")
         # master.resizeable(width=False, height=False)
-        master.geometry('{}x{}'.format(1510, 889))  # width x height
+        self.master.geometry('{}x{}'.format(1093, 889))  # Width x Height
 
         self.address_view = "hex"  # Initialize view base
         self.data_view = "hex"
@@ -180,10 +180,12 @@ class simulator_gui:
         self.memory_display_list.grid(row=16, column=1+column_offset, columnspan=2)
 
         # Add/Remove memory monitor buttons TODO: Implement remove
-        self.add_memory_btn = Button(master, text="Add", command=self.add_monitor)
+        self.add_memory_btn = Button(master, text="Add",
+                                     command=self.add_monitor)
         self.add_memory_btn.grid(row=17, column=1+column_offset)
 
-        self.remove_memory_btn = Button(master, text="Remove")
+        self.remove_memory_btn = Button(master, text="Remove",
+                                        command=self.remove_monitor)
         self.remove_memory_btn.grid(row=17, column=2+column_offset)
 
         # Next/Prev Line Buttons
@@ -287,8 +289,8 @@ class simulator_gui:
         """
 
         if res == 768:
-            self.master.geometry('{}x{}'.format(1211, 648))  # width x height
             self.resolution = 768
+            self.check_window_size()
 
             self.Code_View_lbl.config(width=80, height=40)
             self.CCR_lbl.config(font=("FreeSans", 10))
@@ -311,8 +313,8 @@ class simulator_gui:
             self.memory_display_lbl.config(font=("FreeSans", 10))
 
         elif res == 1080:
-            self.master.geometry('{}x{}'.format(1510, 889))  # width x height
             self.resolution = 1080
+            self.check_window_size()
 
             self.Code_View_lbl.config(width=100, height=60)
             self.CCR_lbl.config(font=("FreeSans", 15))
@@ -347,6 +349,22 @@ class simulator_gui:
         else:
             lovelyNum = int(lovelyString)
         return lovelyNum
+
+    def remove_monitor(self):
+        """
+        Removes the currently selected memory monitor from the memory monitors.
+        """
+        # print(self.memory_display_list.get(ACTIVE))
+        # Obtains the key for the selected memory monitor from user
+        selection = self.memory_display_list.get(ACTIVE)
+        selection = selection.strip().split()
+        selection = selection[0][:-1]
+        selection = self.string_to_num(selection)
+
+        # print(self.memory_monitor)
+        self.memory_monitor.pop(selection)
+        self.memory_display_list.delete(ACTIVE)
+        # print(self.memory_monitor)
 
     def add_monitor(self):
         """
@@ -411,24 +429,25 @@ class simulator_gui:
         C = self.CPU.ccr.get_C()
         self.CCR_value_lbl.config(text="{} {} {} {} {}".format(X, N, Z, V, C))
 
-    # def check_window_size(self):
-    #     """For hex/dec, 1080: height 889 & width 1093
-    #        For bin height 889 & width 1510
-    #
-    #        hex: height 648 & width 1211
-    #        bin: height 648 & width 905
-    #
-    #     """
-    #     if self.address_view == "bin" or self.data_view == "bin":
-    #         if self.resolution == 768:
-    #             self.master.geometry('{}x{}'.format(1211, 648))
-    #         elif self.resolution == 1080:
-    #             self.master.geometry('{}x{}'.format(1510, 889))
-    #     else:
-    #         if self.resolution == 768:
-    #             self.master.geometry('{}x{}'.format(905, 648))
-    #         elif self.resolution == 1080:
-    #             self.master.geometry('{}x{}'.format(1093, 889))
+    def check_window_size(self):
+        """For hex/dec, 1080: height 889 & width 1093
+           For bin height 889 & width 1510
+
+           hex: height 648 & width 1211
+           bin: height 648 & width 905
+
+        """
+        print(self.address_view, self.data_view)
+        if self.address_view == "bin" or self.data_view == "bin":
+            if self.resolution == 768:
+                self.master.geometry('{}x{}'.format(1211, 648))
+            elif self.resolution == 1080:
+                self.master.geometry('{}x{}'.format(1510, 889))
+        else:
+            if self.resolution == 768:
+                self.master.geometry('{}x{}'.format(905, 648))
+            elif self.resolution == 1080:
+                self.master.geometry('{}x{}'.format(1093, 889))
 
     def set_dataRegister_view(self, view=None):
         """
@@ -448,7 +467,7 @@ class simulator_gui:
             else:
                 self.dataRegisters[i].config(text=self.CPU.D[i].get())
 
-        # self.check_window_size()
+        self.check_window_size()
 
     def set_addressRegister_view(self, view=None):
         """
@@ -471,7 +490,7 @@ class simulator_gui:
                 self.addressRegisters[i].config(
                                 text=(self.CPU.A[i].get()))
 
-        # self.check_window_size()
+        self.check_window_size()
 
     def reset_line(self):
         """

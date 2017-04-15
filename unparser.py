@@ -4,23 +4,27 @@ from registers import *
 from memory import *
 from resources import Resources
 
-DEBUG = True
+DEBUG = False
+
 
 class line(Resources):
     '''
-    The line object contains and handles all the processing of the assembly line
-    code as python code. As such, it holds all the information of a given line.
+    The line object contains and handles all the processing of the assembly
+    line code as python code. As such, it holds all the information of a given
+    line.
 
     Attributes:
-        label (str):    Holds the label of the line, if there exists a label, else
-                        it is None by default.
+        label (str):    Holds the label of the line, if there exists a label,
+                        else it is None by default.
 
         command (str):  The command that is being executed in the line. It is a
-                        string so that we can invoke the command using command_dict.
+                        string so that we can invoke the command using
+                        command_dict.
 
-        size (int):     Holds the size of the command being executed (in bytes).
-                        ie. If command is being executed as a longword, the size
-                        that will be stored is 4. Similarly word has a size of 2.
+        size (int):     Holds the size of the command being executed
+                        (in bytes). ie. If command is being executed as a
+                        longword, the size that will be stored is 4. Similarly
+                        word has a size of 2.
 
         source (obj):   The source is either an instance of the effective address
                         class, register class, or an immediate (integer) value.
@@ -46,20 +50,28 @@ class line(Resources):
         self.source = s
         self.dest = d
         self.command = c
-        self.s_inc = None # if the source is an EA, is it being incremented/decremented in this line?
-        self.d_inc = None # the set incrementer method sets these automatically
+
+        # if the source is an EA, is it being incremented/decremented
+        # in this line?
+        self.s_inc = None
+
+        # the set incrementer method sets these automatically
+        self.d_inc = None
         self.set_incrementer()
-        # self.review() - Temporarily disabling auto-review (Add as a feature)
+
+        # self.review() - Uncomment to renable auto-review
 
     def review(self):
         '''
         This method executes the line as python code.
         Returns:        None
-        Side effects:   Creates an instance of the Command class and runs the command.
-                        Then resets incrementer if possible.
+        Side effects:   Creates an instance of the Command class and runs the
+                        command. Then resets incrementer if possible.
         '''
         # execute command:
-        if DEBUG and print(self.label, self.command, self.size, self.source, self.dest): pass
+        if DEBUG and print(self.label, self.command, self.size,
+                           self.source, self.dest): pass
+
         Command(self.command, self.size, self.source, self.dest)
         self.adjust_incrementer()
 
@@ -133,8 +145,8 @@ class AssemblyFileReader():
         The tuple is stored into _line_a (self) and is blueprinted as follows:
             _line_a[line number] = (label, command, size, source, dest)
 
-        #NOTE:  Under this phase of the program, everything stored into the tuple
-                is still a string type
+        #NOTE:  Under this phase of the program, everything stored into the
+                tuple is still a string type
         '''
         c = re.compile(r"""
         \s*                     # skip white space
@@ -147,7 +159,7 @@ class AssemblyFileReader():
         (?P<dest>.*)?)?)?       # dest group
         \s*$                    # skip white space until end of line
         """, re.VERBOSE)
-        if file_name != None:
+        if file_name is not None:
             self.file_name = file_name
         with open(self._filename) as f:
             self._file = f.readlines()
@@ -161,7 +173,8 @@ class AssemblyFileReader():
                 size = l.group('size')
                 source = l.group('source')
                 dest = l.group('dest')
-                # if DEBUG and print([label, command, size, source, dest]): pass
+                if DEBUG and print([label, command, size, source, dest]):
+                    pass
                 self._line_a.append((label, command, size, source, dest))
             f.close()
         self.process_line()
@@ -172,28 +185,30 @@ class AssemblyFileReader():
         strings into their equivalent python objects using the parse functions.
         Line[n] is stored into self._line_p.
         '''
-        n = 0 # line number (0 indexed)
+        n = 0   # line number (0 indexed)
         for e in self._line_a:
             (l, c, z, s, d) = e
-            if l != None and l not in self._label_dict:
+            if l is not None and l not in self._label_dict:
                 self._label_dict[l] = n
             if z in size_dict:
                 z = size_dict[z]
             s = self.parse_source_or_dest(s, z)
             d = self.parse_source_or_dest(d, z)
-            if DEBUG and print(e): pass
+            if DEBUG and print(e):
+                pass
             self._line_p[n] = line(l, c, z, s, d)
             n += 1
 
     def parse_source_or_dest(self, s, z):
         '''
-        This method parses the source and destination strings into python objects
+        This method parses the source and destination strings into python
+        objects.
 
         Arguments:
-            s (str): The string that must be in either source/destination format
-                     which will under go parsing
-            z (int): The size of the operation, specifically needed for predecrement
-                     and postincrementing registers
+            s (str): The string that must be in either source/destination
+                     format which will under go parsing
+            z (int): The size of the operation, specifically needed for
+                     predecrement and postincrementing registers
 
         Returns
             s (obj): The pythonic object of that string.
@@ -203,10 +218,10 @@ class AssemblyFileReader():
         # NOTE: There is a strong chance that offsetting is still buggy.
         '''
 
-        if s is None: # then this element does not exist, so dont worry about it.
+        if s is None:  # This there an element
             return None
 
-        if s.startswith('-'): # then assume pre-decrementation is occuring.
+        if s.startswith('-'):  # then assume pre-decrementation is occuring.
             v = s[1:]
             c = re.compile(r"""
             \(
@@ -266,39 +281,40 @@ class AssemblyFileReader():
                 return memory.get_EA(A[i])
 
         else:
-            if s.startswith('#'): # it is a immediate value
+            if s.startswith('#'):  # it is a immediate value
                 v = s[1:]
-                if v.startswith('0x'): # convert as hex
+                if v.startswith('0x'):  # convert as hex
                     v = int(v, 16)
-                elif v.startswith('0b'): # convert as binary
+                elif v.startswith('0b'):  # convert as binary
                     v = int(v, 2)
-                elif v.startswith('0o'): # convert as octal
+                elif v.startswith('0o'):  # convert as octal
                     v = int(v, 8)
                 else:
-                    v = int(v) # treat as a normal decimal
+                    v = int(v)  # treat as a normal decimal
                 return v
 
-            elif s.startswith('%a'): # it is an address register
+            elif s.startswith('%a'):  # it is an address register
                 return A[int(s[2:])]
-            elif s.startswith('%d'): # it is a data register
+            elif s.startswith('%d'):  # it is a data register
                 return D[int(s[2:])]
             # if it is a raw number, then it is an effective address:
-            elif s.startswith('0x'): # hex
+            elif s.startswith('0x'):  # hex
                 v = int(s[2:], 16)
                 return memory.get_EA(v)
-            elif s.startswith('0b'): # binary
+            elif s.startswith('0b'):  # binary
                 v = int(s[2:], 2)
                 return memory.get_EA(v)
-            elif s.startswith('0o'): # octal
+            elif s.startswith('0o'):  # octal
                 v = int(s[2:], 8)
                 return memory.get_EA(v)
         try:
-            return int(s) # try to convert to a decimal integer if possible
+            return int(s)  # try to convert to a decimal integer if possible
         except:
-            return s # else it must be a string value -ie. perhaps a label?
+            return s  # else it must be a string value -ie. perhaps a label?
 
-# for debugging without using the GUI:
+
 def debugging():
+    # for debugging without using the GUI:
     assembler = AssemblyFileReader('test.s')
     assembler.read_into_list()
     pc._line = assembler._line_p
@@ -309,8 +325,7 @@ def debugging():
             for address in memory._mem:
                 if type(address) == int:
                     print('address:', hex(address).upper(),
-                    'value:', hex(memory.get(address, 1)).upper(),
-                    'ccr:', bin(ccr._val)
-                    )
+                          'value:', hex(memory.get(address, 1)).upper(),
+                          'ccr:', bin(ccr._val))
 
 # debugging()

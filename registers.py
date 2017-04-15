@@ -1,4 +1,4 @@
-DEBUG = True
+DEBUG = False
 
 
 class DataRegister():
@@ -67,48 +67,48 @@ class CCR():
         '''
         Returns: The 5th bit value of _val which is the X flag
         '''
-        return (self._val >> 4)&1
+        return (self._val >> 4) & 1
 
     def get_N(self):
         '''
         Returns: The 4th bit value of _val which is the N flag
         '''
-        return (self._val >> 3)&1
+        return (self._val >> 3) & 1
 
     def get_Z(self):
         '''
         Returns: The 3rd bit value of _val which is the Z flag
         '''
-        return (self._val >> 2)&1
+        return (self._val >> 2) & 1
 
     def get_V(self):
         '''
         Returns: The 2nd bit value of _val which is the V flag
         '''
-        return (self._val >> 1)&1
+        return (self._val >> 1) & 1
 
     def get_C(self):
         '''
         Returns: The 1st bit value of _val which is the C flag
         '''
-        return (self._val >> 0)&1
+        return (self._val >> 0) & 1
 
-    def set(self, X = None, N = None, Z = None, V = None, C = None):
+    def set(self, X=None, N=None, Z=None, V=None, C=None):
         '''
         Sets each flag value that is not 'None' using the assignment methods.
         '''
-        if X != None:
+        if X is not None:
             self.assign_X(X)
-        if N != None:
+        if N is not None:
             self.assign_N(N)
-        if Z != None:
+        if Z is not None:
             self.assign_Z(Z)
-        if V != None:
+        if V is not None:
             self.assign_V(V)
-        if C != None:
+        if C is not None:
             self.assign_C(C)
 
-    def check_C(self, v, X = None):
+    def check_C(self, v, X=None):
         '''
         Test for the carry flag and sets it (automatically). If the X argument
         is not None, then it also sets the X flag.
@@ -243,17 +243,17 @@ class ProgramCounter():
         '''
         Changes n to the line number of the label.
         '''
-        self.n = self._label_dict[label] - 1# since exec line will add 1
+        self.n = self._label_dict[label] - 1  # since exec line will add 1
 
 
 D = dict()
 A = dict()
 
 for i in range(8):
-    D[i] = DataRegister() # initialize the data register
-    A[i] = AddressRegister() # initialize the address register
+    D[i] = DataRegister()  # initialize the data register
+    A[i] = AddressRegister()  # initialize the address register
 
 A[7].set(0xFFFFF, 4)  # iInitialize stack pointer
 
-ccr = CCR() # initialize the ccr
-pc = ProgramCounter() # initialize the pc
+ccr = CCR()  # initialize the ccr
+pc = ProgramCounter()  # initialize the pc
