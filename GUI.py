@@ -1,42 +1,50 @@
-"""
-    - Implement more memory view options such as:
-        * Display different types
-        * Display a range of values
-        * Add more "monitors"
-
-"""
-
 from tkinter import *
 from unparser import AssemblyFileReader
 from CPU import CPU
 
 
 class simulator_gui:
+    """
+        Main GUI for the ColdFire Simulator. Initializes all necessary
+        components for program execution: GUI and CPU.
+
+        Attributes:
+            CPU:            The CPU object that will handle code execution.
+            master:         Tkinter object, necessary for GUI execution
+            address_view:   Keeps track of user specified base for address reg.
+            data_view:      Keeps track of user specified base for data reg.
+            memory_monitor: Keeps track of the memory values the user wishes
+                            to look at.
+            file_name:      The file that is currently being processed.
+            resolution:     Keeps track of user specified size of GUI.
+
+            (For all tkinter GUI elements, see below.)
+
+    """
 
     def __init__(self, master):
 
-        self.CPU = None
+        self.CPU = None  # Initialize the CPU
 
         self.master = master
         master.title("ColdFire Simulator")
         # master.resizeable(width=False, height=False)
         master.geometry('{}x{}'.format(1510, 889))  # width x height
-        # master.config(background="#202020")
 
         self.address_view = "hex"  # Initialize view base
         self.data_view = "hex"
-        self.memory_monitor = dict()
-        self.file_name = ""
-        self.resolution = 1080
+        self.memory_monitor = dict()  # Initialize memory monitors
+        self.file_name = ""  # Initialize file name
+        self.resolution = 1080  # Initialize resolution
 
-        column_offset = 1  # Used to shift the entire right side
+        column_offset = 1  # Used to shift the entire right side after Text
 
         # Text box for code
         self.Code_View_lbl = Text(master, width=100, height=60)
         self.Code_View_lbl.insert(END, "")
         self.Code_View_lbl.grid(row=0, column=0, rowspan=20, pady=20, padx=20)
 
-        # CCR label
+        # CCR labels - row 0
         self.CCR_lbl = Label(master, text="CCR", font=("FreeSans", 15))
         self.CCR_lbl.config(anchor="e", justify="right")
         self.CCR_lbl.grid(row=0, column=1+column_offset, sticky=E)
@@ -45,7 +53,7 @@ class simulator_gui:
                                    font=("FreeSans", 15), relief=SUNKEN)
         self.CCR_value_lbl.grid(row=0, column=2+column_offset, padx=20, sticky=W)
 
-        # OP code labels - row 0-3
+        # OP code labels - row 1-4
         self.OP_lbl = Label(master, text="OP Code", font=("FreeSans", 15))
         self.OP_lbl.grid(row=1, column=1+column_offset, columnspan=2)
 
@@ -53,31 +61,36 @@ class simulator_gui:
                                   relief=SUNKEN)
         self.OP_value_lbl.grid(row=2, column=1+column_offset, columnspan=2)
 
-        self.extension1_lbl = Label(master, text="Extension 1:", font=("FreeSans", 15))
+        self.extension1_lbl = Label(master, text="Extension 1:",
+                                    font=("FreeSans", 15))
         self.extension1_lbl.grid(row=3, column=1+column_offset)
 
         self.extension1_value_lbl = Label(master, text="0x0",
                                           font=("FreeSans", 15))
         self.extension1_value_lbl.grid(row=3, column=2+column_offset)
 
-        self.extension2_lbl = Label(master, text="Extension 2:", font=("FreeSans", 15))
+        self.extension2_lbl = Label(master, text="Extension 2:",
+                                    font=("FreeSans", 15))
         self.extension2_lbl.grid(row=4, column=1+column_offset)
 
-        self.extension2_value_lbl = Label(master, text="0x0", font=("FreeSans", 15))
+        self.extension2_value_lbl = Label(master, text="0x0",
+                                          font=("FreeSans", 15))
         self.extension2_value_lbl.grid(row=4, column=2+column_offset)
 
         # Address Register Labels - rows 5-9, cols 1-2,
-        # hardcoded constants: spacer = 7th row + offset, columns = 1 or 2
+        # hardcoded constants: spacer = 6th row + offset, columns = 1 or 2
         # Also note spacer is based on counter
         self.addressReg_lbl = Label(master, text="Address Registers:",
                                     font=("FreeSans", 15))
         self.addressReg_lbl.grid(row=5, column=1+column_offset, columnspan=2)
 
+        # Initialize address register labels
         self.addressRegisters = []
         for _ in range(8):
             self.addressRegisters.append(Label(master, text="0x0",
                                                font=("FreeSans", 12), padx=10))
 
+        # Place the address register labels on the grid.
         counter = 0
         for label in self.addressRegisters:
             if counter < 4:
@@ -88,17 +101,19 @@ class simulator_gui:
                 label.grid(row=spacer, column=2+column_offset)
             counter += 1
 
+        # Initialize address register number labels
         self.addressRegisters_value_lbl = []
         for i in range(8):
 
-            if i < 4:
-                txt="A"+str(i)+":"
+            if i < 4:  # Number the labels appropiately
+                txt = "A"+str(i)+":"
             else:
                 txt = ":"+"A"+str(i)
 
             self.addressRegisters_value_lbl.append(Label(master, text=txt,
                                                font=("FreeSans", 12), padx=10))
 
+        # Place the address register number labesl on the grid.
         counter = 0
         for label in self.addressRegisters_value_lbl:
             if counter < 4:
@@ -109,18 +124,20 @@ class simulator_gui:
                 label.grid(row=spacer, column=2+column_offset+1)
             counter += 1
 
-
         # Data Register Labels - rows 10-14, col = 1,2
-        # hardcoded constants: spacer = 13th row + offset, columns
+        # hardcoded constants: spacer = 11th row + offset, columns
         # Also note spacer is based on counter.
-        self.dataReg_lbl = Label(master, text="Data Registers:", font=("FreeSans", 12))
+        self.dataReg_lbl = Label(master, text="Data Registers:",
+                                 font=("FreeSans", 12))
         self.dataReg_lbl.grid(row=10, column=1+column_offset, columnspan=2)
 
+        # Initialize data register labels
         self.dataRegisters = []
         for _ in range(8):
             self.dataRegisters.append(Label(master, text="0x0",
                                             font=("FreeSans", 12)))
 
+        # Place data register labels on the grid
         counter = 0
         for label in self.dataRegisters:
             if counter < 4:
@@ -131,17 +148,19 @@ class simulator_gui:
                 label.grid(row=spacer, column=2+column_offset)
             counter += 1
 
+        # Initialize data register number labels
         self.dataRegisters_value_lbl = []
         for i in range(8):
 
-            if i < 4:
-                txt="D"+str(i)+":"
+            if i < 4:  # Assign appropiate numbering.
+                txt = "D"+str(i)+":"
             else:
                 txt = ":"+"D"+str(i)
 
             self.dataRegisters_value_lbl.append(Label(master, text=txt,
-                                               font=("FreeSans", 12), padx=10))
+                                                font=("FreeSans", 12), padx=10))
 
+        # Place data register number labels on grid.
         counter = 0
         for label in self.dataRegisters_value_lbl:
             if counter < 4:
@@ -160,9 +179,7 @@ class simulator_gui:
         self.memory_display_list = Listbox(master)
         self.memory_display_list.grid(row=16, column=1+column_offset, columnspan=2)
 
-        # self.memory_display2_list = Listbox(master)
-        # self.memory_display2_list.grid(row=16, column=2+column_offset)
-
+        # Add/Remove memory monitor buttons TODO: Implement remove
         self.add_memory_btn = Button(master, text="Add", command=self.add_monitor)
         self.add_memory_btn.grid(row=17, column=1+column_offset)
 
@@ -170,7 +187,6 @@ class simulator_gui:
         self.remove_memory_btn.grid(row=17, column=2+column_offset)
 
         # Next/Prev Line Buttons
-
         self.next_btn = Button(master, text="Next Line", command=self.next_line)
         self.next_btn.grid(row=18, column=1+column_offset)
 
@@ -178,11 +194,11 @@ class simulator_gui:
         self.reset_btn.grid(row=18, column=2+column_offset)
 
         # Menu bar
-        # TODO: Add file choosing ability
         self.menubar = Menu(master)
         self.menubar.add_command(label="Load file", command=self.loadfile)
         self.master.config(menu=self.menubar)
 
+        # Screen resolution menu
         self.resolution = Menu(self.menubar, tearoff=0)
         self.resolution.add_command(label="1920x1080",
         command=lambda res=1080: self.change_res(res))
@@ -191,6 +207,7 @@ class simulator_gui:
         self.menubar.add_cascade(label="Screen Resolution",
                                  menu=self.resolution)
 
+        # Data register view menu
         self.dataRegister_menu = Menu(self.menubar, tearoff=0)
         self.dataRegister_menu.add_command(label="View in Bin",
         command=lambda view="bin": self.set_dataRegister_view(view))
@@ -204,6 +221,7 @@ class simulator_gui:
         self.menubar.add_cascade(label="Data Register",
                                  menu=self.dataRegister_menu)
 
+        # Address register view menu
         self.addressRegister_menu = Menu(self.menubar, tearoff=0)
         self.addressRegister_menu.add_command(label="View in Bin",
         command=lambda view="bin": self.set_addressRegister_view(view))
@@ -217,6 +235,7 @@ class simulator_gui:
         self.menubar.add_cascade(label="Address Register",
                                  menu=self.addressRegister_menu)
 
+        # Theme menu
         self.theme_menu = Menu(self.menubar, tearoff=0)
         self.theme_menu.add_command(label="Light",
                                     command=lambda t="light": self.set_theme(t))
@@ -224,15 +243,20 @@ class simulator_gui:
                                     command=lambda t="dark": self.set_theme(t))
         self.menubar.add_cascade(label="Set Theme", menu=self.theme_menu)
 
+        # Quit
         self.menubar.add_command(label="Quit", command=self.master.quit)
 
         # self.change_res()  # Comment out for not auto-changing.
 
     def windowsize(self):  # DEBUG Purposes
+        # Obtains size of GUI.
         print("height", self.master.winfo_height())
         print("width", self.master.winfo_width())
 
     def set_theme(self, theme):
+        """
+        Sets the theme of the GUI, by modifying all GUI elements.
+        """
         if theme == "dark":
             self.master.config(background="#202020")
 
@@ -257,6 +281,10 @@ class simulator_gui:
             self.master.config(background="#E0E0E0")
 
     def change_res(self, res):
+        """
+        Changes size of all GUI elements to better fit the size of different
+        size screens.
+        """
 
         if res == 768:
             self.master.geometry('{}x{}'.format(1211, 648))  # width x height
@@ -307,6 +335,9 @@ class simulator_gui:
             self.memory_display_lbl.config(font=("FreeSans", 15))
 
     def string_to_num(self, lovelyString):
+        """
+        Converts a string in base 2, 10, or 16 into a number
+        """
         if lovelyString.startswith('0x'):
             lovelyNum = int(lovelyString, 16)
         elif lovelyString.startswith('0b'):
@@ -318,25 +349,30 @@ class simulator_gui:
         return lovelyNum
 
     def add_monitor(self):
+        """
+        Obtains a requested memory monitor from the user and adds it a dict()
+        that will be used to update a scroll box with respective values.
+        """
 
         def get_input():
-            # print(user_input.get())
+            # Obtain input from the user.
             address = user_input.get()
             address_list = [a.strip() for a in address.split(',')]
-            # print(address)
 
             # if not self.CPU.add_memory_monitor(address):  # TODO: Give error
             #     print("Error: Invalid memory address")
             #
+
+            # Allows us to obtain a list of memory values inputted by user, in
+            # hex, bin, and dec.
             for address in address_list:
                 address = self.string_to_num(address)
-                # print("add", hex(address))
                 self.memory_monitor[address] = self.CPU.memory.memory.get(address, 1)
-                # print(self.CPU.memory.memory.get(address, 1))
 
-            self.update_mem()
+            self.update_mem()  # Update the memory display
             prompt_monitor.destroy()
 
+        # Create a top level dialog box.
         prompt_monitor = Toplevel()
         prompt_monitor.geometry('{}x{}'.format(299, 155))
         prompt_monitor.title("Monitor Selection")
@@ -353,13 +389,21 @@ class simulator_gui:
         self.update_mem()
 
     def update_mem(self):
-        self.memory_display_list.delete(0, END)
-        # self.memory_display2_list.delete(0, END)
+        """
+        Based on the monitors as defined by the user, updates the values disp.
+        on the GUI with the respective memory values.
+        """
+        self.memory_display_list.delete(0, END)  # Clear list
+
+        # Parse through the memory "monitors", get and display values.
         for address in sorted(self.memory_monitor.keys()):
-            self.memory_display_list.insert(END,
-            "{}: {}".format(hex(address), hex(self.CPU.memory.memory.get(address, 1))))
+            self.memory_display_list.insert(END, "{}: {}".format(hex(address),
+                                hex(self.CPU.memory.memory.get(address, 1))))
 
     def update_ccr(self):
+        """
+        Update the CCR label with corresponding values.
+        """
         X = self.CPU.ccr.get_X()
         N = self.CPU.ccr.get_N()
         Z = self.CPU.ccr.get_Z()
@@ -387,15 +431,16 @@ class simulator_gui:
     #             self.master.geometry('{}x{}'.format(1093, 889))
 
     def set_dataRegister_view(self, view=None):
+        """
+        Updates the all data register values.
+        """
         if view is not None:
             self.data_view = view
         else:
             view = self.data_view
 
-        print(self.CPU.D[2].get())
-
         for i in range(8):
-            # print(self.CPU.D[i].get())
+            # Sets the view base as determined by user.
             if view == "bin":
                 self.dataRegisters[i].config(text=bin(self.CPU.D[i].get()))
             elif view == "hex":
@@ -406,13 +451,16 @@ class simulator_gui:
         # self.check_window_size()
 
     def set_addressRegister_view(self, view=None):
+        """
+        Updates the all address register values.
+        """
         if view is not None:
             self.address_view = view
         else:
             view = self.address_view
 
         for i in range(8):
-            # print(self.CPU.A[i].get())
+            # Sets view base as determined by user.
             if view == "bin":
                 self.addressRegisters[i].config(
                                 text=bin(self.CPU.A[i].get()))
@@ -426,20 +474,28 @@ class simulator_gui:
         # self.check_window_size()
 
     def reset_line(self):
+        """
+        Resets program execution.
+        TODO: Reset variables and GUI displays.
+        """
         self.CPU.pc.n = 0
         # self.CPU.pc.n = 0
         self.Code_View_lbl.tag_remove("current_line", 1.0, "end")
         self.Code_View_lbl.tag_add("current_line", 1.0, 2.0)
 
     def next_line(self):  # TODO: Constrain next line to max num of lines
+        """
+        Executes the next line and updates respective GUI displays.
+        """
         self.CPU.pc.exec_line()
 
         self.update_mem()
         self.display_register()
         self.update_ccr()
-        # if changes:  # If there are changes, display and highlight them
+        # if changes:  # TODO: If there are changes, display and highlight them
         self.display_register()
 
+        # Move the current line selection cursor.
         highlight_start = str(self.CPU.pc.n + 1) + ".0"
         highlight_end = str(self.CPU.pc.n + 2) + ".0"
         self.Code_View_lbl.tag_remove("current_line", 1.0, "end")
