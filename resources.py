@@ -91,6 +91,9 @@ class Resources():
         return val
 
     def twos_complement(self, val, size):
+        '''
+        Gets the two's complement of a given value based on a size for sign extension.
+        '''
         if (val >> size*8-1)&1 == 1: # the value should be treated as a negative
             count = size*8-1
             pos = 0

@@ -56,11 +56,19 @@ class Memory():
         self._mem = dict()
 
     def get_EA(self, address, inc = None, offset = None, sf = None):
+        '''
+        Sets up (if necessary) and returns the effective address.
+        '''
         if address not in self._mem:
             self._mem[address] = EffectiveAddress(address, is_increment = inc, offset = offset, sf = sf)
         return self._mem[address]
 
     def get(self, address, size=1):
+        '''
+        Returns the value contained in the effective address instance that is
+        tied to the specified memory location. By default it will return only one
+        byte, but can return the value of up to any specified number of bytes.
+        '''
         v = 0
         for z in range(size):
             if (address+size-z-1) not in self._mem:
@@ -69,10 +77,16 @@ class Memory():
         return v
 
     def set(self, address, val, size):
+        '''
+        Sets each effective address with a value that is one byte in length by breaking
+        the argument val into one byte components. The value is broken and stored in
+        such a way where the most significant byte is stored in the address location
+        and the least significant byte is stored in the address + size - 1 location.
+        '''
         b = 0xFF  # one byte
         v = val
         for z in range(size):
             self._mem[address+size-z-1] = EffectiveAddress(address+size-z-1, v & b)
             v >>= 8 # shift by one byte
 
-memory = Memory()
+memory = Memory() # initialize memory

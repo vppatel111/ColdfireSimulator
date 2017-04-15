@@ -29,6 +29,15 @@ class line(Resources):
                         effective address class, or register class, but cannot be
                         an immediate value.
 
+        s_inc (bool):   Set to None unless the source is an effective address (EA)
+                        with a post-increment or pre-decrement option. If the
+                        EA is being post-incremented the value is set to True;
+                        if it is being pre-decremented the value is set to False.
+
+        d_inc (bool):   Exactly the same principles of s_inc apply to d_inc except
+                        that d_inc is specified for the destination rather than
+                        the source.
+
         #TODO: need more testing!!!
     '''
     def __init__(self, l=None, c=None, z=None, s=None, d=None):
@@ -37,7 +46,7 @@ class line(Resources):
         self.source = s
         self.dest = d
         self.command = c
-        self.s_inc = None # if the source is an EA, is being incremented/decremented in this line?
+        self.s_inc = None # if the source is an EA, is it being incremented/decremented in this line?
         self.d_inc = None # the set incrementer method sets these automatically
         self.set_incrementer()
         # self.review() - Temporarily disabling auto-review (Add as a feature)
@@ -45,29 +54,33 @@ class line(Resources):
     def review(self):
         '''
         This method executes the line as python code.
-        Returns:    None
-
-        #TODO:      Change command_dict to actual command object that invokes
-                    both the command_dict as well as its method command.
+        Returns:        None
+        Side effects:   Creates an instance of the Command class and runs the command.
+                        Then resets incrementer if possible.
         '''
         # execute command:
         if DEBUG and print(self.label, self.command, self.size, self.source, self.dest): pass
         Command(self.command, self.size, self.source, self.dest)
-        # if self.source is not None:
-        #     s = self.get_source()
-        # if self.dest is not None:
-        #     d = self.get_dest()
-
         self.adjust_incrementer()
-        # if DEBUG and print("SOURCE: {} , DEST: {}".format(s, d)): pass
 
     def set_incrementer(self):
+        '''
+        Sets the initial value of the incrementer.
+        IE. if the source (or destination) is an EA, it will check to see whether
+            or not it is being incremented and saves that information into
+            s_inc and d_inc respectively.s
+        '''
         if isinstance(self.source, EffectiveAddress):
             self.s_inc = self.source._inc
         if isinstance(self.dest, EffectiveAddress):
             self.d_inc = self.dest._inc
 
     def adjust_incrementer(self):
+        '''
+        Regarding the source and destination, if either are an EA, reset their
+        incrementer as they are disabled during the running of their respective
+        commands to avoid multiple incrementations (or decrementations).
+        '''
         if isinstance(self.source, EffectiveAddress):
             self.source._inc = self.s_inc
         if isinstance(self.dest, EffectiveAddress):
@@ -77,7 +90,28 @@ class line(Resources):
 class AssemblyFileReader():
     '''
     Reads through the '.s' file and converts the assembly commands into python
-    command for later execution.
+    command for later execution. Also stores raw information of each file for
+    later use.
+
+    Attributes:
+        _filename (str):    Name of the given file.
+
+        _file (list):       A list of strings where each string is the unparsed
+                            line in the file.
+
+        _line_a (list):     A list of tuples containing the parsed strings of each line.
+                            The tuple is in the format:
+                                (label, command, size, source, destination)
+                            Where if any of the elements do not exist, it is set to None
+                            by default.
+
+        _line_p (dict):     A dictionary containing the pythonic version of the assembly code
+                            where the key is the line number. Each line number maps
+                            to an instance of the line class.
+
+        _label_dict (dict): A dictionary where the key is a label (if any) which
+                            maps to the line number of when the label was "labeled".
+
     #NOTE:  Still a work in progress as we might need to change a few elements
             when dealing with multiple files.
     #TODO:  -Fix the scale factor parsing.
@@ -165,12 +199,14 @@ class AssemblyFileReader():
             s (obj): The pythonic object of that string.
                         ie. '%a0' will return the instance of the AddressRegister
                         class that represents the register a0.
+
+        # NOTE: There is a strong chance that offsetting is still buggy.
         '''
 
-        if s is None:
+        if s is None: # then this element does not exist, so dont worry about it.
             return None
 
-        if s.startswith('-'):
+        if s.startswith('-'): # then assume pre-decrementation is occuring.
             v = s[1:]
             c = re.compile(r"""
             \(
@@ -178,10 +214,10 @@ class AssemblyFileReader():
             \)
             """, re.VERBOSE)
             i = int(c.match(v).group('register'))
-            v = A[i]
-            return memory.get_EA(v, False)
+            v = A[i] # get address register as an object since the EA will be "dynamic"
+            return memory.get_EA(v, False) # set the effective address based off of that register object
 
-        elif s.endswith('+'):
+        elif s.endswith('+'): # then assume post-incrementation is occuring.
             v = s[:-1]
             c = re.compile(r"""
             \(
@@ -189,13 +225,13 @@ class AssemblyFileReader():
             \)
             """, re.VERBOSE)
             i = int(c.match(v).group('register'))
-            v = A[i] # get address register
-            return memory.get_EA(v, True) # get effective address
+            v = A[i] # get address register as an object
+            return memory.get_EA(v, True) # get effective address based off of the register
 
-        elif s.startswith('(') and s.endswith(')'):
+        elif s.startswith('(') and s.endswith(')'): # then there are 3 possibilities
             v = s[1:-1]
             l = len(v.split(','))
-            if l == 3:
+            if l == 3: # the format is (offset, address register, scale*factor)
                 c = re.compile(r"""
                 \(
                 (?P<offset>\d),
@@ -209,8 +245,8 @@ class AssemblyFileReader():
                 factor = int(c.match(s).group('factor'))
                 if factor == None:
                     factor = 1
-                return memory.get_EA( A[i], None, offset, scale*factor)
-            elif l == 2:
+                return memory.get_EA( A[i], None, offset, scale*factor) # get the effective address
+            elif l == 2: # the format is (offset, address register)
                 c = re.compile(r"""
                 \(
                 (?P<offset>\d),
@@ -220,7 +256,7 @@ class AssemblyFileReader():
                 offset = int(c.match(s).group('offset'))
                 i = int(c.match(s).group('address'))
                 return memory.get_EA( A[i], None, offset )
-            elif l == 1:
+            elif l == 1: # the format is (address register)
                 c = re.compile(r"""
                 \(
                 %a(?P<address>\d)
@@ -230,36 +266,38 @@ class AssemblyFileReader():
                 return memory.get_EA(A[i])
 
         else:
-            if s.startswith('#'):
+            if s.startswith('#'): # it is a immediate value
                 v = s[1:]
-                if v.startswith('0x'):
+                if v.startswith('0x'): # convert as hex
                     v = int(v, 16)
-                elif v.startswith('0b'):
+                elif v.startswith('0b'): # convert as binary
                     v = int(v, 2)
-                elif v.startswith('0o'):
+                elif v.startswith('0o'): # convert as octal
                     v = int(v, 8)
                 else:
-                    v = int(v)
+                    v = int(v) # treat as a normal decimal
                 return v
 
-            elif s.startswith('%a'):
+            elif s.startswith('%a'): # it is an address register
                 return A[int(s[2:])]
-            elif s.startswith('%d'):
+            elif s.startswith('%d'): # it is a data register
                 return D[int(s[2:])]
-            elif s.startswith('0x'):
+            # if it is a raw number, then it is an effective address:
+            elif s.startswith('0x'): # hex
                 v = int(s[2:], 16)
                 return memory.get_EA(v)
-            elif s.startswith('0b'):
+            elif s.startswith('0b'): # binary
                 v = int(s[2:], 2)
                 return memory.get_EA(v)
-            elif s.startswith('0o'):
+            elif s.startswith('0o'): # octal
                 v = int(s[2:], 8)
                 return memory.get_EA(v)
         try:
-            return int(s)
+            return int(s) # try to convert to a decimal integer if possible
         except:
-            return s
+            return s # else it must be a string value -ie. perhaps a label?
 
+# for debugging without using the GUI:
 def debugging():
     assembler = AssemblyFileReader('test.s')
     assembler.read_into_list()
