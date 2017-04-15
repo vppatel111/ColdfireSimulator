@@ -34,7 +34,7 @@ class EffectiveAddress():
     def get_address(self, z):
         if isinstance(self._address, AddressRegister):
             address = self._address.get()
-            if self._inc == False: # decrement address register
+            if self._inc == False:  # decrement address register
                 self._address.set(address-z, 4)
                 address = self._address.get()
             elif self._inc == True:
@@ -58,12 +58,16 @@ class Memory():
     def __init__(self):
         self._mem = dict()
 
+    def reset_mem(self):
+        self._mem = dict()
+
     def get_EA(self, address, inc = None, offset = None, sf = None):
         '''
         Sets up (if necessary) and returns the effective address.
         '''
         if address not in self._mem:
-            self._mem[address] = EffectiveAddress(address, is_increment=inc, offset=offset, sf = sf)
+            self._mem[address] = EffectiveAddress(address, is_increment=inc,
+                                                  offset=offset, sf=sf)
         return self._mem[address]
 
     def get(self, address, size=1):

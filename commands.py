@@ -1,21 +1,17 @@
 '''
 This contains all the commands related to assembly language.
 See Coldfire Manual for full details on how commands work.
-
-NOTE: Does (-) mean we should just ignore it???
-- Negative numbers are either above 268 435 456 or actually negative.
-- Add an immediate value type
 '''
 from resources import Resources
 from registers import *
 import memory
-DEBUG = True
+DEBUG = False
 # dictionary of sizes
 size_dict = {
-		'l' : 4,
-		'w' : 2,
-		'b' : 1,
-}
+			'l': 4,
+			'w': 2,
+			'b': 1
+			}
 
 class Command(Resources):
 	'''
@@ -37,8 +33,8 @@ class Command(Resources):
 		  # 'move ccr':		lambda: self.move_ccr(), -- Extra
 
 		  # Stack Manipulation/Address Affecting Commands
-		  'lea':		lambda: self.lea(),  # Necessary
-		  'pea':		lambda: self.pea(),  # Necessary
+		  'lea':		lambda: self.lea(),
+		  'pea':		lambda: self.pea(),
 
 		  # Branching Commands
 		  'bra':		lambda: self.bra(),
@@ -54,8 +50,8 @@ class Command(Resources):
 		  'bvs':		lambda: self.bvs(),
 		  'bpl':		lambda: self.bpl(),
 		  'bmi':		lambda: self.bmi(),
-		  # 'link':		lambda: self.link(),
-		  # 'unlk':		lambda: self.unlk(),
+		  # 'link':		lambda: self.link(), -- Extra
+		  # 'unlk':		lambda: self.unlk(), -- Extra
 
 
 		  # Extra: Bit tests and do something functions.
@@ -77,11 +73,11 @@ class Command(Resources):
 		  'subq':		lambda: self.subq(),
 		  # 'subx':		lambda: self.subx(), -- Extra
 
-		  'divs':		lambda: self.divs(),  # Necessary
-		  'divu':		lambda: self.divu(),  # Necessary
+		  # 'divs':		lambda: self.divs(), -- Extra
+		  'divu':		lambda: self.divu(),
 
-		  'muls':		lambda: self.muls(),  # Necessary
-		  'mulu':		lambda: self.mulu(),  # Necessary
+		  # 'muls':		lambda: self.muls(),  -- Extra
+		  'mulu':		lambda: self.mulu(),
 
 		  'clr':		lambda: self.clr(),
 
@@ -110,10 +106,12 @@ class Command(Resources):
 		  # 'tst':		lambda: self._tst(),
 		  'nop':		lambda: self._nop()
 		 }
+
 		if c in command_dict:
 			command_dict[c]()
 
 	def move(self):
+		# Move a value.
 		s = self.get_source()
 		d = self.get_dest()
 		z = self.size
@@ -131,7 +129,6 @@ class Command(Resources):
 		# CCR: - * * 0 0
 		ccr.set(N = ccr.check_N(s, z), Z = ccr.check_Z(s), V = 0, C = 0)
 
-	# NOTE: If the code is wrong it breaks before this check even happens.
 	def movea(self):
 		# Moves an address given at source into an address register.
 		if isinstance(self.dest, AddressRegister):
@@ -321,8 +318,6 @@ class Command(Resources):
 					V = ccr.check_V(s, d, new_d),
 					C = ccr.check_C(result, X = True))
 
-
-	# Breaks properly.
 	def adda(self):
 		# Adds any source to an address register.
 		if isinstance(self.dest, AddressRegister):
@@ -343,7 +338,7 @@ class Command(Resources):
 			print("Error: Invalid Destination")
 
 	def addi(self):
-		# Adds any source and destination together.
+		# Adds an immediate value to any source.
 		if isinstance(self.dest, DataRegister) and type(self.source) == int:
 			s = self.get_source()
 			d = self.get_dest()
@@ -369,6 +364,7 @@ class Command(Resources):
 			print("Error: Invalid Destination")
 
 	def addq(self):
+		# Adds an immediate value between 1-8 to the source.
 		if type(self.source) == int and self.source >= 0 and self.source <= 7:
 			self.addi()
 		else:
@@ -391,7 +387,6 @@ class Command(Resources):
 			s &= 0xffffffff
 
 			result = (d-s) & 0xffffffff  # Truncate
-			# print("SUPER DUPER RESULT", result)
 			self.set_dest((result), z)
 			new_d = self.get_dest()
 
@@ -436,18 +431,21 @@ class Command(Resources):
 			print("Error: Invalid Destination")
 
 	def subi(self):
+		# Subtracts any immediate value from the source.
 		if type(self.source) == int:
 			self.sub()
 		else:
 			raise Exception("Source is not an immediate value!")
 
 	def subq(self):
+		# Subtracts any immediate value between 1-8 from the source.
 		if type(self.source) == int and self.source >= 0 and self.source <= 7:
 			self.sub()
 		else:
 			raise Exception("Source is not an immediate value")
 
 	def clr(self):
+		# Clears a number of bits from a data register
 		if isinstance(self.source, DataRegister):
 			s = self.get_source()
 			z = self.size
@@ -502,10 +500,9 @@ class Command(Resources):
 					V = ccr.check_V(old_s, old_d, new_d),
 					C = 0)
 
-	def divs(self):
-		pass
-
 	def mulu(self):
+		# Multiplies the source and destination together, and the result
+		# is stored in the destination.
 		s = self.get_source()
 		d = self.get_dest()
 
@@ -531,9 +528,6 @@ class Command(Resources):
 					V = 0,
 					C = 0)
 
-	def muls(self):
-		pass
-
 	def neg(self):
 		if isinstance(self.source, DataRegister):
 			old_s = self.get_source()
@@ -550,7 +544,6 @@ class Command(Resources):
 
 
 	def asl(self):
-
 		# Shifts a value left by 0-8 bits.
 		if isinstance(self.dest, DataRegister):
 			s = self.get_source()
@@ -764,12 +757,14 @@ class Command(Resources):
 					C = ccr.check_C(result, True))
 
 	def lea(self):
+		# Sets an address register to the specified EffectiveAddress
 		s = self.get_source_address()
 		self.set_dest(s, 4)
 
 		# CCR: - - - - -
 
 	def pea(self):  # NOTE: A7 or SP is initialized in registers.
+		# Pushes an EffectiveAddress onto the top of the stack.
 		s = self.get_source_address()
 		a = memory.memory.get_EA(A[7])
 		a.set(s, 4)

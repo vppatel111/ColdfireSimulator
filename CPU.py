@@ -1,11 +1,7 @@
 from memory import memory
-# from registers import DataRegister, AddressRegister, CCR
 from registers import ccr, D, A, pc
-# import registers
 from commands import *
 from unparser import AssemblyFileReader, line
-
-# from program_counter import Program_Counter
 
 
 class CPU():
@@ -30,6 +26,7 @@ class CPU():
         self.pc._line = self.assembler._line_p
         self.pc._label_dict = self.assembler._label_dict
 
+    # TODO: Implement op code generation.
     # def generate_op_code(self):
     #     print("Command: ", self.pc._line[self.pc.n].get_dest_address(),
     #           self.pc._line[self.pc.n].get_source_address())
@@ -42,10 +39,3 @@ class CPU():
     #     }
     #     command = op_command_dict[self.parsed_assembly_code[self.pc.n][1]]
     #     print(command)
-
-    # NOTE: Creates a mem location, even if it is never used.
-    def add_memory_monitor(self, address):
-        print("add", address)
-        address = self.string_to_num(address)
-        self.memory_monitor[address] = self.memory.get(address, 4)
-        print(memory.get(address, 1), self.memory.get(address, 1))

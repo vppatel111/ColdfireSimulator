@@ -437,7 +437,7 @@ class simulator_gui:
            bin: height 648 & width 905
 
         """
-        print(self.address_view, self.data_view)
+        # print(self.address_view, self.data_view)
         if self.address_view == "bin" or self.data_view == "bin":
             if self.resolution == 768:
                 self.master.geometry('{}x{}'.format(1211, 648))
@@ -495,10 +495,21 @@ class simulator_gui:
     def reset_line(self):
         """
         Resets program execution.
-        TODO: Reset variables and GUI displays.
         """
-        self.CPU.pc.n = 0
-        # self.CPU.pc.n = 0
+        self.CPU.pc.n = 0  # Reset program counter
+
+        # Reset all registers and memory
+        for i in range(8):
+            self.CPU.D[i].set(0, 4)
+            self.CPU.A[i].set(0, 4)
+        self.CPU.memory.memory.reset_mem()
+
+        self.CPU.A[7].set(0xFFFFF, 4)  # initialize stack pointer
+
+        # Update labels
+        self.update_mem()
+        self.display_register()
+
         self.Code_View_lbl.tag_remove("current_line", 1.0, "end")
         self.Code_View_lbl.tag_add("current_line", 1.0, 2.0)
 
@@ -670,6 +681,7 @@ class simulator_gui:
         self.Code_View_lbl.tag_configure("current_line", background="#e9e9e9")
         self.Code_View_lbl.tag_remove("current_line", 1.0, "end")
         self.Code_View_lbl.tag_add("current_line", 1.0, 2.0)
+        self.display_register()
 
     def display_register(self):
         """
