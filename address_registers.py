@@ -1,1 +1,0 @@
-#  HOW 2 INHERITANCE
