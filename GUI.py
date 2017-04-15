@@ -1,18 +1,15 @@
 """
-    Additional features to add: -The ability to view registers in different
-    formats (eg, decimal, ascii etc)
     - Implement more memory view options such as:
         * Display different types
         * Display a range of values
         * Add more "monitors"
-
-    BUG: - Remember to initialize stack pointer.
 
 """
 
 from tkinter import *
 from unparser import AssemblyFileReader
 from CPU import CPU
+
 
 class simulator_gui:
 
@@ -436,9 +433,7 @@ class simulator_gui:
 
     def next_line(self):  # TODO: Constrain next line to max num of lines
         self.CPU.pc.exec_line()
-        self.CPU.generate_op_code()
-        # self.CPU.pc.n = self.CPU.pc.n
-        # changes = self.CPU.check_for_change()
+
         self.update_mem()
         self.display_register()
         self.update_ccr()
@@ -452,18 +447,22 @@ class simulator_gui:
                                    highlight_end)
 
     def get_file_dir(self):
-        def get_input():
+        """
+        Obtains a requested file name from the user and stores it in a class
+        variable: self.file_name
+        """
+        def get_input():  # Obtains input from a input box
 
             self.file_name = user_input.get()
-            print(self.file_name)
+            # print(self.file_name)
             prompt_file.destroy()
 
-        prompt_file = Toplevel()
+        prompt_file = Toplevel()  # Create a dialog box.
 
         prompt_file.geometry('{}x{}'.format(299, 155))
         prompt_file.title("File Selection")
 
-        msg = Message(prompt_file, text="Enter a file: ")
+        msg = Message(prompt_file, text="Enter the file name: ")
         msg.pack()
 
         user_input = Entry(prompt_file)
@@ -474,7 +473,6 @@ class simulator_gui:
 
         self.master.wait_window(prompt_file)
 
-
     def loadfile(self):
         """
         Loads in a .s file at that is currently in the same directory as
@@ -482,18 +480,18 @@ class simulator_gui:
         it calls an unparser to process the file.
         """
 
+        # Obtain and load a file requested by the user
         self.get_file_dir()
-
         file_directory = "AssemblyTest/" + self.file_name
         self.CPU = CPU(file_directory+'.s')
-        # self.CPU = CPU('test.s')
 
         self.Code_View_lbl.delete(1.0, END)  # Clear text
 
+        # Initialize oru cursors
         highlight_start = 0
         highlight_end = 0
         line_number = 1
-        # Formats each line and inserts it
+        # Formats each line and inserts it into the Text widget
         for e in self.CPU.assembler._line_a:
 
             """ Label """
@@ -511,85 +509,96 @@ class simulator_gui:
 
                 # Add and display the colour tag
                 self.Code_View_lbl.tag_add("color_tag",
-                                    str(line_number) + "." + str(highlight_start),
-                                    str(line_number) + "." + str(highlight_end + 1))
+                            str(line_number) + "." + str(highlight_start),
+                            str(line_number) + "." + str(highlight_end + 1))
                 self.Code_View_lbl.tag_configure("color_tag", foreground="red")
 
-                print(str(line_number) + "." + str(highlight_start),
-                      str(line_number) + "." + str(highlight_end))
+                # print(str(line_number) + "." + str(highlight_start),
+                #      str(line_number) + "." + str(highlight_end))
 
                 highlight_end += 2  # Account for formatting
 
                 if not e[1]:  # Check if label was the only instruction
                     self.Code_View_lbl.insert(END, "\n")
                     line_number += 1
-                    continue
+                    continue  # If it was skip the rest of the line processing
 
             else:  # Otherwise we skip over the label
                 self.Code_View_lbl.insert(END, "        ")
                 highlight_end = 8
 
-            """ Instruction """
-            highlight_start = highlight_end
+            """ Instruction (Note: Always an instruction)"""
+            highlight_start = highlight_end  # Move cursor to start instruction
             highlight_end = highlight_start + len(e[1])  # Size of command text
 
-            self.Code_View_lbl.insert(END, e[1])
+            self.Code_View_lbl.insert(END, e[1])  # Insert the command
 
+            # Add and display the colour tag
             self.Code_View_lbl.tag_add("color_tag2",
                                 str(line_number) + "." + str(highlight_start),
                                 str(line_number) + "." + str(highlight_end))
             self.Code_View_lbl.tag_configure("color_tag2", foreground="blue")
 
             """ Size """
-            if e[2]:
+            if e[2]:  # Check for size label
                 self.Code_View_lbl.insert(END, ".")
 
-                highlight_start = highlight_end + 1
-                highlight_end = highlight_start + 2  # Size of command text
+                highlight_start = highlight_end + 1  # Account for period
+                highlight_end = highlight_start + 2  # Size of "size" text
 
+                # Inser the size
                 self.Code_View_lbl.insert(END, e[2])
 
+                # Add and display the colour tag
                 self.Code_View_lbl.tag_add("color_tag3",
-                                    str(line_number) + "." + str(highlight_start),
-                                    str(line_number) + "." + str(highlight_end))
-                self.Code_View_lbl.tag_configure("color_tag3", foreground="orange")
+                                str(line_number) + "." + str(highlight_start),
+                                str(line_number) + "." + str(highlight_end))
+                self.Code_View_lbl.tag_configure("color_tag3",
+                                                 foreground="orange")
             else:
-                highlight_end += 1
+                highlight_end += 1  # Otherwise we skip over size
 
             self.Code_View_lbl.insert(END, " ")  # Necessary space
 
             """ Source """
-            if e[3]:
-                highlight_start = highlight_end
+            if e[3]:  # Check for source label
+                highlight_start = highlight_end  # Space already accounted for
                 highlight_end = highlight_start + len(e[3])  # Size of text
 
+                # Insert the source and tag it with colour
                 self.Code_View_lbl.insert(END, e[3])
 
                 self.Code_View_lbl.tag_add("color_tag4",
                                 str(line_number) + "." + str(highlight_start),
                                 str(line_number) + "." + str(highlight_end))
-                self.Code_View_lbl.tag_configure("color_tag4", foreground="green")
+                self.Code_View_lbl.tag_configure("color_tag4",
+                                                 foreground="green")
 
             """ Destination """
-            if e[4]:
+            if e[4]:  # Check for destination label
                 self.Code_View_lbl.insert(END, ", ")  # Necessary comma
                 highlight_start = highlight_end + 1
                 highlight_end = highlight_start + len(e[4]) + 1  # Size of text
 
+                # Insert the dest and tag it with colourr
                 self.Code_View_lbl.insert(END, e[4])
-
                 self.Code_View_lbl.tag_add("color_tag5",
                                 str(line_number) + "." + str(highlight_start),
                                 str(line_number) + "." + str(highlight_end))
-                self.Code_View_lbl.tag_configure("color_tag5", foreground="#660033")
+                self.Code_View_lbl.tag_configure("color_tag5",
+                                                 foreground="#660033")
 
             self.Code_View_lbl.insert(END, "\n")
             line_number += 1
 
+        # Also display the current line selection
         self.Code_View_lbl.tag_configure("current_line", background="#e9e9e9")
         self.Code_View_lbl.tag_remove("current_line", 1.0, "end")
         self.Code_View_lbl.tag_add("current_line", 1.0, 2.0)
 
     def display_register(self):
+        """
+        Calls function that update the data and address registers respectively.
+        """
         self.set_dataRegister_view()
         self.set_addressRegister_view()
