@@ -1,0 +1,33 @@
+Coldfire Simulator by Vishal Patel and Rizwan Qureshi
+
+Background:
+The Coldfire simulator is essentially just an assembly language simulator based on the Coldfire Microprossesors that we used in our ECE 212 class. Unfortunately there weren't many resources to check whether we were doing our assignments correctly for ECE 212 and so we were motivated to create a program that would help us with these assignments.
+
+Before conisidering to run the program, make sure that you have the following files in your directory:
+- commands.py
+- CPU.py
+- GUI.py
+- memory.py
+- registers.py
+- parser.py
+- resources.py
+- SimulatorMain.py
+- AssemblyTest (folder)
+
+Though they should already be contained within the zip file.
+
+How to run the program:
+- Make sure you're in the same directory as the above files in the terminal.
+- If you would like to test one of your own assembly files, import them into the "AssemblyTest" folder. By default, we put in a few our assignment assembly codes.
+- Simply type "python3 SimulatorMain.py" in the terminal without any quotations and the GUI should start.
+
+How to use the program:
+- At this time we only support two resolutions which are: 1920x1080 and 1366x768. You can can choose whichever resolution you prefer under the "Screen Resolution" option at the top.
+- You may also choose to change the Theme of the simulator under the "Set Theme" option at the top. Unfortunately this is still also a work progress.
+- To load a file from the "AssemblyTest" folder simply type the name of the '.s' file with out the '.s' in the popup box after hitting "Loadfile" at the top left. For example you can load the 'test.s' file by simply typing in 'test'.
+- labels are color coded in red while commands are in blue, size is in orange, sources are in green, and destinations are also in blue.
+- To move to the next line, simply hit next at the bottom right of GUI.
+- After each line is executed, you can see the effects it has on the data register, address register, CCR register, and the memory.
+- To see the desired memory location you can "add" the memory to the memory map in hex, octal, decimal, or binary format as a comma seperated list. For example hitting the "add" button and typing in "0x1000, 0x1001" into the popup box, you can see the effects of the first line has on the memory for the 'test.s' file. Unfortunately you cannot choose to remove the memory using the "Remove" box as off yet  as we haven't worked towards implementing it (for now).
+- You can change the way the data register and address registers values are displayed from hex to binary or decimal by choosing them under the "Data Register" and "Address Register" panels.
+- Finally you can reset the execution of the file using the "Reset" button.
