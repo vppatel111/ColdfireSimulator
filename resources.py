@@ -25,17 +25,39 @@ class Resources():
         else:
             return self.source
 
-    def get_source_address(self, o = None):
+    def get_source_address(self, o=None):
         '''
-        Returns:    The address stored within the source, only works with
-                    effective addresses.
+        Returns:    The address stored within the source for type EA
+                    or returns register number for registers.
         '''
         if o != None:
             self.source = o
         if isinstance(self.source, EffectiveAddress):  # Push in effective add
-            return self.source.get_address(self.size)
+            return self.source._address
+            # print("EA S")
         elif isinstance(self.source, AddressRegister):
-            return self.source.get_address(self.size)
+            return self.source.get_tag()
+            # print("A S")
+        elif isinstance(self.source, DataRegister):
+            return self.source.get_tag()
+            # print("D S")
+
+    def get_dest_address(self, o=None):
+        '''
+        Returns:    The address stored within the dest for type EA
+                    or returns register number for registers.
+        '''
+        if o != None:
+            self.source = o
+        if isinstance(self.source, EffectiveAddress):  # Push in effective add
+            return self.dest._address
+            # print("EA D")
+        elif isinstance(self.source, AddressRegister):
+            return self.dest.get_tag()
+            # print("A D")
+        elif isinstance(self.source, DataRegister):
+            return self.dest.get_tag()
+            # print("D D")
 
     def get_dest(self, o = None):
         '''

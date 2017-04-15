@@ -238,6 +238,24 @@ class simulator_gui:
     def set_theme(self, theme):
         if theme == "dark":
             self.master.config(background="#202020")
+
+            self.Code_View_lbl.config(background="#404040")
+            # self.CCR_lbl.config(font=("FreeSans", 10))
+            # self.CCR_value_lbl.config(font=("FreeSans", 10))
+            # self.OP_lbl.config(font=("FreeSans", 10))
+            # self.OP_value_lbl.config(font=("FreeSans", 10))
+            # self.extension1_lbl.config(font=("FreeSans", 10))
+            # self.extension1_value_lbl.config(font=("FreeSans", 10))
+            # self.extension2_lbl.config(font=("FreeSans", 10))
+            # self.extension2_value_lbl.config(font=("FreeSans", 10))
+            # self.addressReg_lbl.config(font=("FreeSans", 10))
+            # self.dataReg_lbl.config(font=("FreeSans", 10))
+            #
+            # for register in self.addressRegisters:
+            #     register.config(font=("FreeSans", 10), padx=10)
+            #
+            # for register in self.dataRegisters:
+            #     register.config(font=("FreeSans", 10), padx=10)
         elif theme == "light":
             self.master.config(background="#E0E0E0")
 
@@ -418,6 +436,7 @@ class simulator_gui:
 
     def next_line(self):  # TODO: Constrain next line to max num of lines
         self.CPU.pc.exec_line()
+        self.CPU.generate_op_code()
         # self.CPU.pc.n = self.CPU.pc.n
         # changes = self.CPU.check_for_change()
         self.update_mem()
@@ -562,7 +581,7 @@ class simulator_gui:
                 self.Code_View_lbl.tag_add("color_tag5",
                                 str(line_number) + "." + str(highlight_start),
                                 str(line_number) + "." + str(highlight_end))
-                self.Code_View_lbl.tag_configure("color_tag5", foreground="blue")
+                self.Code_View_lbl.tag_configure("color_tag5", foreground="#660033")
 
             self.Code_View_lbl.insert(END, "\n")
             line_number += 1

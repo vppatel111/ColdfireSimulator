@@ -243,7 +243,7 @@ class AssemblyFileReader():
                 i = int(c.match(s).group('address'))
                 scale = int(c.match(s).group('scale'))
                 factor = int(c.match(s).group('factor'))
-                if factor == None:
+                if factor is None:
                     factor = 1
                 return memory.get_EA( A[i], None, offset, scale*factor) # get the effective address
             elif l == 2: # the format is (offset, address register)

@@ -1,5 +1,6 @@
 DEBUG = True
 
+
 class DataRegister():
     '''
     The data register class is meant to simulate a data structure.
@@ -191,6 +192,7 @@ class CCR():
         else:
             self._val &= 0b11110
 
+
 class ProgramCounter():
     '''
     The Program Counter directs the execution of each line in the assembly code.
@@ -210,10 +212,12 @@ class ProgramCounter():
     # TODO:
         Add functionality with op codes.
     '''
-    def __init__(self, line = dict(), label = dict()):
+    def __init__(self, line=dict(), label=dict(), op_code=list(), locations=dict()):
         self._line = line
         self._label_dict = label
         self.n = 0
+        self.op_code = op_code
+        self.location_data = locations
 
     def exec_line(self):
         '''

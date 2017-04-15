@@ -1,4 +1,6 @@
 from registers import AddressRegister
+
+
 class EffectiveAddress():
     '''
     An instance of an effective address in memory which is called by the Memory
@@ -42,6 +44,7 @@ class EffectiveAddress():
             address = self._address
         return address
 
+
 class Memory():
     '''
     This class handles all the memory components of the Coldfire simulator.
@@ -60,7 +63,7 @@ class Memory():
         Sets up (if necessary) and returns the effective address.
         '''
         if address not in self._mem:
-            self._mem[address] = EffectiveAddress(address, is_increment = inc, offset = offset, sf = sf)
+            self._mem[address] = EffectiveAddress(address, is_increment=inc, offset=offset, sf = sf)
         return self._mem[address]
 
     def get(self, address, size=1):
